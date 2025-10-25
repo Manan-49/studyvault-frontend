@@ -1,0 +1,13 @@
+{
+  "extends": [
+    "development"
+  ],
+  "hints": {
+    "axe/forms": "off",
+    "axe/name-role-value": "off",
+    "compat-api/css": "off",
+    "no-inline-styles": "off",
+    "typescript-config/consistent-casing": "off",
+    "apple-touch-icons": "off"
+  }
+}
