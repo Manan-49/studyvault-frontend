@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Trash2, Shield, User as UserIcon, Mail, Calendar, Ban } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { getAvatarUrl, getUserInitials, getAvatarColor } from '@/lib/utils/avatar'
 
 interface User {
   id: string
@@ -25,20 +26,10 @@ interface UserCardProps {
 }
 
 export function UserCard({ user, isCurrentUser, isAdmin, onDelete, onBlock, index }: UserCardProps) {
-  // ✅ FIXED: Proper avatar URL construction
-  const getAvatarUrl = () => {
-    if (!user.avatar_url) return undefined
-    
-    // If avatar_url is already a full path (starts with /api/v1), use it directly
-    if (user.avatar_url.startsWith('/api/v1')) {
-      return `${process.env.NEXT_PUBLIC_API_URL}${user.avatar_url}?t=${Date.now()}`
-    }
-    
-    // Otherwise, it's just the endpoint path
-    return `${process.env.NEXT_PUBLIC_API_URL}${user.avatar_url}?t=${Date.now()}`
-  }
-
-  const avatarUrl = getAvatarUrl()
+  // ✅ Use avatar helper
+  const avatarUrl = getAvatarUrl(user.id, user.avatar_url)
+  const initials = getUserInitials(user.name)
+  const avatarColor = getAvatarColor(user.id)
 
   return (
     <motion.div
@@ -61,19 +52,12 @@ export function UserCard({ user, isCurrentUser, isAdmin, onDelete, onBlock, inde
       <div className="mb-4 flex justify-center">
         <div className="relative">
           <Avatar className="h-20 w-20 ring-4 ring-gray-100 transition-all group-hover:ring-blue-200 dark:ring-gray-800 dark:group-hover:ring-blue-900/50">
-            <AvatarImage 
-              src={avatarUrl} 
-              alt={user.name}
-              onError={(e) => {
-                console.log('[AVATAR] Failed to load:', avatarUrl)
-                // Let fallback handle it
-              }}
-            />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-xl font-bold text-white">
-              {user.name.charAt(0).toUpperCase()}
+            <AvatarImage src={avatarUrl} alt={user.name} />
+            <AvatarFallback className={`bg-gradient-to-br ${avatarColor} text-xl font-bold text-white`}>
+              {initials}
             </AvatarFallback>
           </Avatar>
-          
+
           {user.role === 'admin' && (
             <div className="absolute -bottom-1 -right-1 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 p-1.5 shadow-lg">
               <Shield className="h-4 w-4 text-white" />
