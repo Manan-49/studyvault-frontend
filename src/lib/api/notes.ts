@@ -1,5 +1,15 @@
+// src/lib/api/notes.ts
+
 import { apiClient } from './client'
 import type { PaginatedResponse } from '@/types'
+
+export interface CheckboxUser {
+  user_id: string
+  user_name: string
+  avatar_url?: string
+  checked: boolean
+  checked_at: string
+}
 
 export interface Note {
   id: string
@@ -13,13 +23,6 @@ export interface Note {
   checkboxes: Record<string, CheckboxUser[]>
 }
 
-export interface CheckboxUser {
-  user_id: string
-  user_name: string
-  checked: boolean
-  checked_at: string
-}
-
 export interface NoteCreate {
   title: string
   content?: Record<string, any>
@@ -30,6 +33,13 @@ export interface NoteCreate {
 export interface NoteUpdate {
   title?: string
   content?: Record<string, any>
+  folder_id?: string
+  is_public?: boolean
+}
+
+export interface MarkdownImport {
+  title: string
+  markdown: string
   folder_id?: string
   is_public?: boolean
 }
@@ -65,6 +75,11 @@ export const notesApi = {
       checkbox_id: checkboxId,
       checked,
     })
+    return response.data
+  },
+
+  importMarkdown: async (data: MarkdownImport) => {
+    const response = await apiClient.post<Note>('/notes/import-markdown', data)
     return response.data
   },
 }
