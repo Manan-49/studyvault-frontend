@@ -10,6 +10,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       attribute="class"
       defaultTheme="light"
       enableSystem={false}
+      themes={['light', 'dark', 'amoled', 'night']}
       storageKey="studyvault-theme"
       disableTransitionOnChange={false}
     >

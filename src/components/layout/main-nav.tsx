@@ -1,3 +1,5 @@
+// src/components/layout/main-nav.tsx
+
 'use client'
 
 import Link from 'next/link'
@@ -12,25 +14,20 @@ import {
   Users,
   LogOut,
   Shield,
-  Moon,
-  Sun,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { getAvatarUrl, getUserInitials } from '@/lib/utils/avatar'
+import { ThemeSwitcher } from '@/components/theme-switcher'
 
 export function MainNav() {
   const pathname = usePathname()
   const { user, logout } = useAuthStore()
-  const [isDark, setIsDark] = useState(false)
   const [isClient, setIsClient] = useState(false)
 
   // Mount client-side immediately
   useEffect(() => {
     setIsClient(true)
-    // Check theme
-    const theme = localStorage.getItem('studyvault-theme')
-    setIsDark(theme === 'dark')
   }, [])
 
   // ✅ FIXED: Use avatar helper instead of fetch
@@ -44,17 +41,6 @@ export function MainNav() {
     { name: 'Activity', href: '/activity', icon: Activity },
     { name: 'Users', href: '/users', icon: Users },
   ]
-
-  const toggleTheme = () => {
-    setIsDark(!isDark)
-    if (isDark) {
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('studyvault-theme', 'light')
-    } else {
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('studyvault-theme', 'dark')
-    }
-  }
 
   const handleLogout = () => {
     logout()
@@ -113,32 +99,8 @@ export function MainNav() {
 
             {/* Right Side - Theme Toggle, Avatar, Logout */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Theme Toggle */}
-              {isClient && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={toggleTheme}
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
-                  aria-label="Toggle theme"
-                >
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.div
-                      key={isDark ? 'dark' : 'light'}
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {isDark ? (
-                        <Moon className="h-4 w-4 text-blue-500" />
-                      ) : (
-                        <Sun className="h-4 w-4 text-orange-500" />
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
-                </motion.button>
-              )}
+              {/* Theme Switcher - Replaced old toggle */}
+              {isClient && <ThemeSwitcher />}
 
               {/* Profile */}
               <Link href="/profile">
@@ -216,4 +178,4 @@ export function MainNav() {
       </nav>
     </>
   )
-} 
+}
