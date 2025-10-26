@@ -17,7 +17,7 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { formatBytes } from '@/lib/utils/format'
 import { filesApi } from '@/lib/api/files'
-import { storage } from '@/lib/utils/storage'
+import { apiClient } from '@/lib/api/client'
 import { FileBreadcrumb } from '@/components/file-viewer/file-breadcrumb'
 import { PDFViewerEnhanced } from '@/components/file-viewer/pdf-viewer-enhanced'
 import { ImageViewerEnhanced } from '@/components/file-viewer/image-viewer-enhanced'
@@ -47,6 +47,7 @@ export default function FileViewPage() {
   const [file, setFile] = useState<FileData | null>(null)
   const [fileUrl, setFileUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadingBlob, setLoadingBlob] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Fetch file data
@@ -74,30 +75,35 @@ export default function FileViewPage() {
 
     const loadFileBlob = async () => {
       try {
-        const token = storage.getAccessToken()
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/files/${file.id}/download`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        )
+        setLoadingBlob(true)
+        
+        // ✅ FIXED: Use apiClient to download with proper auth and URL
+        const response = await apiClient.get(`/files/${file.id}/download`, {
+          responseType: 'blob',
+        })
 
-        if (!response.ok) throw new Error('Failed to load file')
-
-        const blob = await response.blob()
+        // Create blob URL
+        const blob = response.data
         const url = URL.createObjectURL(blob)
         setFileUrl(url)
-      } catch (error) {
+        setError(null)
+      } catch (error: any) {
         console.error('Error loading file blob:', error)
+        setError('Failed to load file preview')
+      } finally {
+        setLoadingBlob(false)
       }
     }
 
     loadFileBlob()
 
+    // Cleanup blob URL on unmount
     return () => {
-      if (fileUrl) URL.revokeObjectURL(fileUrl)
+      if (fileUrl) {
+        URL.revokeObjectURL(fileUrl)
+      }
     }
-  }, [file])
+  }, [file?.id])
 
   // Handlers
   const handleDownload = async () => {
@@ -114,25 +120,35 @@ export default function FileViewPage() {
       document.body.removeChild(a)
     } catch (error) {
       console.error('Download failed:', error)
+      setError('Download failed. Please try again.')
     }
   }
 
   const handlePrint = () => {
     if (fileUrl) {
       const printWindow = window.open(fileUrl, '_blank')
-      printWindow?.print()
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print()
+        }
+      }
     }
   }
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: file?.title,
-        url: window.location.href,
-      })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert('Link copied to clipboard!')
+  const handleShare = async () => {
+    try {
+      if (navigator.share && file) {
+        await navigator.share({
+          title: file.title,
+          text: `Check out this file: ${file.title}`,
+          url: window.location.href,
+        })
+      } else {
+        await navigator.clipboard.writeText(window.location.href)
+        alert('Link copied to clipboard!')
+      }
+    } catch (err) {
+      console.error('Share failed:', err)
     }
   }
 
@@ -150,7 +166,7 @@ export default function FileViewPage() {
   }
 
   // Error state
-  if (error || !file) {
+  if (error && !file) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -173,6 +189,10 @@ export default function FileViewPage() {
         </motion.button>
       </motion.div>
     )
+  }
+
+  if (!file) {
+    return null
   }
 
   const isPDF = file.mime_type === 'application/pdf'
@@ -255,7 +275,31 @@ export default function FileViewPage() {
         >
           <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
             <div className="aspect-[4/3] md:aspect-auto md:h-[600px]">
-              {isPDF && fileUrl ? (
+              {loadingBlob ? (
+                <div className="flex h-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+                  <div className="text-center">
+                    <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+                    <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading preview...</p>
+                  </div>
+                </div>
+              ) : error ? (
+                <div className="flex h-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+                  <div className="text-center">
+                    <AlertCircle className="mx-auto h-16 w-16 text-red-400" />
+                    <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                      {error}
+                    </p>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleDownload}
+                      className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                    >
+                      Download File
+                    </motion.button>
+                  </div>
+                </div>
+              ) : isPDF && fileUrl ? (
                 <PDFViewerEnhanced
                   url={fileUrl}
                   fileName={file.filename}
