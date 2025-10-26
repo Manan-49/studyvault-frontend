@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { authApi } from '@/lib/api/auth'
 import { useAuthStore } from '@/lib/stores/auth'
-import { storage } from '@/lib/utils/storage'
-import { buildApiUrl } from '@/lib/utils/api-url'
 import ProfileSidebar from '@/components/profile/profile-sidebar'
 import ProfileInfoCard from '@/components/profile/profile-info-card'
 import SecurityCard from '@/components/profile/security-card'
@@ -16,41 +14,12 @@ export default function ProfilePage() {
   const { user, setUser } = useAuthStore()
   
   const [mounted, setMounted] = useState(false)
-  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined)
   const [avatarModalOpen, setAvatarModalOpen] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
-
-  useEffect(() => {
-    if (!user?.avatar_url || !mounted) return
-
-    const loadAvatar = async () => {
-      try {
-        const token = storage.getAccessToken()
-        const fullUrl = buildApiUrl(user.avatar_url!)
-        
-        const response = await fetch(fullUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-
-        if (response.ok) {
-          const blob = await response.blob()
-          const url = URL.createObjectURL(blob)
-          setAvatarUrl(url)
-        }
-      } catch (error) {
-        console.error('Failed to load avatar:', error)
-      }
-    }
-
-    loadAvatar()
-    return () => {
-      if (avatarUrl) URL.revokeObjectURL(avatarUrl)
-    }
-  }, [user?.avatar_url, mounted])
 
   const handleProfileUpdate = async (data: { name: string; email: string }) => {
     try {
@@ -79,15 +48,13 @@ export default function ProfilePage() {
 
   const handleAvatarSuccess = async () => {
     try {
+      // ✅ Fetch fresh user data with new avatar URL
       const updatedUser = await authApi.getMe()
       setUser(updatedUser)
       
-      if (avatarUrl) {
-        URL.revokeObjectURL(avatarUrl)
-      }
-      
       showToast('Avatar updated successfully', 'success')
       
+      // ✅ Force refresh after short delay to show new avatar
       setTimeout(() => {
         window.location.reload()
       }, 1000)
@@ -120,7 +87,7 @@ export default function ProfilePage() {
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Sidebar */}
+          {/* Sidebar - Pass user directly, let ProfileSidebar handle avatar */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -128,7 +95,6 @@ export default function ProfilePage() {
           >
             <ProfileSidebar
               user={user}
-              avatarUrl={avatarUrl}
               onAvatarClick={() => setAvatarModalOpen(true)}
             />
           </motion.div>

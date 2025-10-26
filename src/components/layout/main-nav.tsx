@@ -1,5 +1,3 @@
-// src/components/layout/main-nav.tsx
-
 'use client'
 
 import Link from 'next/link'
@@ -17,14 +15,13 @@ import {
   Moon,
   Sun,
 } from 'lucide-react'
-import { storage } from '@/lib/utils/storage'
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { getAvatarUrl, getUserInitials } from '@/lib/utils/avatar'
 
 export function MainNav() {
   const pathname = usePathname()
   const { user, logout } = useAuthStore()
-  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined)
   const [isDark, setIsDark] = useState(false)
   const [isClient, setIsClient] = useState(false)
 
@@ -36,36 +33,9 @@ export function MainNav() {
     setIsDark(theme === 'dark')
   }, [])
 
-  // Load avatar with auth token
-  useEffect(() => {
-    if (!user?.avatar_url || !isClient) return
-
-    const loadAvatar = async () => {
-      try {
-        const token = storage.getAccessToken()
-        const avatarUrl = user?.avatar_url?.startsWith('http')
-          ? user.avatar_url
-          : `${process.env.NEXT_PUBLIC_API_URL}${user.avatar_url}`
-
-        const response = await fetch(avatarUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-
-        if (response.ok) {
-          const blob = await response.blob()
-          const url = URL.createObjectURL(blob)
-          setAvatarUrl(url)
-        }
-      } catch (error) {
-        console.error('Failed to load avatar:', error)
-      }
-    }
-
-    loadAvatar()
-    return () => {
-      if (avatarUrl) URL.revokeObjectURL(avatarUrl)
-    }
-  }, [user?.avatar_url, isClient])
+  // ✅ FIXED: Use avatar helper instead of fetch
+  const avatarUrl = user?.id ? getAvatarUrl(user.id, user.avatar_url) : undefined
+  const initials = getUserInitials(user?.name || '')
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -102,7 +72,7 @@ export function MainNav() {
             {/* Logo & Desktop Navigation */}
             <div className="flex items-center gap-4 sm:gap-8">
               <Link href="/dashboard" className="flex items-center gap-2">
-                {/* ✅ Logo Image */}
+                {/* Logo Image */}
                 <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-lg shadow-lg sm:h-10 sm:w-10">
                   <Image
                     src="/icon-192.png"
@@ -176,10 +146,15 @@ export function MainNav() {
                   <div className="relative flex-shrink-0">
                     <div className="h-7 w-7 overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 sm:h-8 sm:w-8">
                       {avatarUrl ? (
-                        <img src={avatarUrl} alt={user?.name} className="h-full w-full object-cover" />
+                        <img 
+                          key={avatarUrl} 
+                          src={avatarUrl} 
+                          alt={user?.name} 
+                          className="h-full w-full object-cover" 
+                        />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-xs font-bold text-white sm:text-sm">
-                          {user?.name?.charAt(0).toUpperCase()}
+                          {initials}
                         </div>
                       )}
                     </div>
@@ -241,4 +216,4 @@ export function MainNav() {
       </nav>
     </>
   )
-}
+} 
