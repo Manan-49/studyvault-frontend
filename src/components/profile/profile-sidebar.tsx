@@ -30,7 +30,7 @@ export default function ProfileSidebar({
   return (
     <div className="sticky top-8 space-y-6">
       {/* Avatar & Basic Info */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition-colors dark:border-slate-700 dark:bg-slate-800">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card transition-colors">
         <div className="p-6">
           {/* Avatar */}
           <div className="mb-6 flex justify-center">
@@ -43,7 +43,7 @@ export default function ProfileSidebar({
                 <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 opacity-25 blur transition-opacity group-hover:opacity-75" />
 
                 {/* Avatar Container */}
-                <div className="relative h-32 w-32 rounded-full bg-white p-1 dark:bg-slate-700">
+                <div className="relative h-32 w-32 rounded-full bg-card p-1">
                   <Avatar className="h-full w-full">
                     <AvatarImage 
                       key={avatarUrl} 
@@ -139,7 +139,7 @@ export default function ProfileSidebar({
       {/* Security Info Card */}
       <div className="rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 p-6 text-white">
         <div className="mb-3 flex items-center gap-3">
-          <div className="rounded-lg bg-white/20 p-2 backdrop-blur-sm">
+          <div className="rounded-lg bg-card/20 p-2 backdrop-blur-sm">
             <Shield className="h-5 w-5 text-white" />
           </div>
           <h3 className="font-semibold">Account Security</h3>

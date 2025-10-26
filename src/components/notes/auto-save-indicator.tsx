@@ -16,7 +16,7 @@ export function AutoSaveIndicator({ isSaving }: AutoSaveIndicatorProps) {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
-          className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+          className="flex items-center gap-2 text-sm text-muted-foreground"
         >
           <Loader2 className="h-4 w-4 animate-spin" />
           <span>Saving...</span>

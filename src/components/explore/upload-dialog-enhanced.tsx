@@ -85,15 +85,15 @@ export function UploadDialogEnhanced({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900"
+              className="w-full max-w-2xl overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-800">
+              <div className="flex items-center justify-between border-b border-border p-6">
                 <div className="flex items-center gap-3">
                   <div className="rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5">
                     <Upload className="h-5 w-5 text-white" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-xl font-bold text-card-foreground">
                     Upload Files
                   </h2>
                 </div>
@@ -101,7 +101,7 @@ export function UploadDialogEnhanced({
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={onClose}
-                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent"
                 >
                   <X className="h-5 w-5" />
                 </motion.button>
@@ -118,7 +118,7 @@ export function UploadDialogEnhanced({
                     borderColor: isDragging ? '#3b82f6' : '#e5e7eb',
                     backgroundColor: isDragging ? '#eff6ff' : '#fafafa',
                   }}
-                  className="mb-6 cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all dark:border-gray-700 dark:bg-gray-800/50"
+                  className="mb-6 cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <motion.div
@@ -127,13 +127,13 @@ export function UploadDialogEnhanced({
                   >
                     <Upload className="mx-auto mb-4 h-16 w-16 text-blue-500" />
                   </motion.div>
-                  <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="mb-2 text-lg font-semibold text-card-foreground">
                     {isDragging ? 'Drop files here' : 'Drag & drop files'}
                   </h3>
-                  <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                  <p className="mb-4 text-sm text-muted-foreground">
                     or click to browse
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Supported: PDF, PNG, JPG (max 100MB per file)
                   </p>
                   <input
@@ -148,8 +148,8 @@ export function UploadDialogEnhanced({
 
                 {/* File List */}
                 {files.length > 0 && (
-                  <div className="mb-6 max-h-64 space-y-2 overflow-y-auto rounded-xl border border-gray-200 p-4 dark:border-gray-700">
-                    <h4 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <div className="mb-6 max-h-64 space-y-2 overflow-y-auto rounded-xl border border-border p-4">
+                    <h4 className="mb-3 text-sm font-semibold text-card-foreground">
                       Selected Files ({files.length})
                     </h4>
                     {files.map((file, index) => (
@@ -158,15 +158,15 @@ export function UploadDialogEnhanced({
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
+                        className="flex items-center justify-between rounded-lg bg-muted p-3"
                       >
                         <div className="flex items-center gap-3">
                           <FileText className="h-5 w-5 text-blue-500" />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
+                            <p className="truncate text-sm font-medium text-card-foreground">
                               {file.name}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-muted-foreground">
                               {(file.size / 1024 / 1024).toFixed(2)} MB
                             </p>
                           </div>
@@ -175,7 +175,7 @@ export function UploadDialogEnhanced({
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => removeFile(index)}
-                          className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+                          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent"
                         >
                           <X className="h-4 w-4" />
                         </motion.button>
@@ -191,7 +191,7 @@ export function UploadDialogEnhanced({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onClose}
-                    className="flex-1 rounded-xl border-2 border-gray-300 bg-white px-4 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    className="flex-1 rounded-xl border-2 border-border bg-background px-4 py-3 font-semibold text-card-foreground transition-colors hover:bg-accent"
                   >
                     Cancel
                   </motion.button>

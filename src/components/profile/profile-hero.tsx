@@ -61,7 +61,7 @@ export default function ProfileHero({
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 opacity-75 blur-lg transition-opacity group-hover:opacity-100" />
 
               {/* Avatar Container */}
-              <div className="relative h-32 w-32 rounded-full bg-white p-1">
+              <div className="relative h-32 w-32 rounded-full bg-card p-1">
                 <Avatar className="h-full w-full">
                   <AvatarImage src={avatarUrl} alt={user?.name} />
                   <AvatarFallback className={`bg-gradient-to-br ${avatarColor} text-3xl font-bold text-white`}>
@@ -109,11 +109,11 @@ export default function ProfileHero({
               transition={{ delay: 0.3 }}
               className="flex flex-wrap items-center justify-center gap-3 text-sm text-blue-100"
             >
-              <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 backdrop-blur-sm">
+              <div className="flex items-center gap-1.5 rounded-full bg-card/10 px-3 py-1.5 backdrop-blur-sm">
                 <Calendar className="h-4 w-4" />
                 <span>Joined {formatDate(user?.created_at || new Date().toISOString())}</span>
               </div>
-              <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 backdrop-blur-sm">
+              <div className="flex items-center gap-1.5 rounded-full bg-card/10 px-3 py-1.5 backdrop-blur-sm">
                 <Clock className="h-4 w-4" />
                 <span>Last active today</span>
               </div>
@@ -141,7 +141,7 @@ function StatItem({ label, value, loading }: { label: string; value: any; loadin
   return (
     <div className="text-center">
       {loading ? (
-        <div className="mx-auto h-8 w-12 animate-pulse rounded bg-white/20" />
+        <div className="mx-auto h-8 w-12 animate-pulse rounded bg-card/20" />
       ) : (
         <div className="text-2xl font-bold text-white">{value}</div>
       )}

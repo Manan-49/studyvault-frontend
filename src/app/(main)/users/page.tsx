@@ -97,10 +97,10 @@ export default function UsersPage() {
       >
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+            <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
               👥 Users
             </h1>
-            <p className="mt-1 text-gray-600 dark:text-gray-400">
+            <p className="mt-1 text-muted-foreground">
               {isAdmin ? 'Manage all registered users' : 'View all registered users'}
             </p>
           </div>
@@ -138,12 +138,12 @@ export default function UsersPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search users by name, email, or role..."
-          className="h-12 w-full rounded-xl border-2 border-gray-200 bg-white pl-12 pr-12 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+          className="h-12 w-full rounded-xl border-2 border-border bg-background pl-12 pr-12 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/20 text-foreground"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -181,7 +181,7 @@ export default function UsersPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400"
+        className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
       >
         <UsersIcon className="h-4 w-4" />
         <span>

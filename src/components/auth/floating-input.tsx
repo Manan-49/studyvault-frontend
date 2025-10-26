@@ -35,7 +35,7 @@ export function FloatingInput({
       <div className="relative">
         {/* Icon */}
         {icon && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
             {icon}
           </div>
         )}
@@ -53,9 +53,9 @@ export function FloatingInput({
             props.onBlur?.(e)
           }}
           className={`
-            peer h-14 w-full rounded-xl border-2 bg-white py-4 text-gray-900 
+            peer h-14 w-full rounded-xl border-2 bg-background py-4 text-foreground 
             transition-all duration-200 outline-none
-            dark:bg-gray-900 dark:text-white
+            dark:bg-background dark:text-foreground
             ${icon ? 'pl-12' : 'pl-4'}
             ${isValid ? 'pr-12' : error ? 'pr-12' : 'pr-4'}
             ${
@@ -63,7 +63,7 @@ export function FloatingInput({
                 ? 'border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
                 : isValid
                   ? 'border-green-500 focus:border-green-500 focus:ring-4 focus:ring-green-500/10'
-                  : 'border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:focus:border-blue-500'
+                  : 'border-border focus:border-primary focus:ring-4 focus:ring-primary/10'
             }
             ${className}
           `}

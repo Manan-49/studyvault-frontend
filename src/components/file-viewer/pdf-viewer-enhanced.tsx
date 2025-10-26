@@ -52,7 +52,7 @@ export function PDFViewerEnhanced({ url, fileName, totalPages }: PDFViewerProps)
   return (
     <div className="flex h-full flex-col">
       {/* Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-t-2xl border-b border-gray-200 bg-white/80 p-3 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/80">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-t-2xl border-b border-border bg-card/80 p-3 backdrop-blur-sm">
         {/* Zoom Controls */}
         <div className="flex items-center gap-2">
           <motion.button
@@ -60,12 +60,12 @@ export function PDFViewerEnhanced({ url, fileName, totalPages }: PDFViewerProps)
             whileTap={{ scale: 0.95 }}
             onClick={handleZoomOut}
             disabled={zoom <= 50}
-            className="rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Zoom out"
           >
             <ZoomOut className="h-4 w-4" />
           </motion.button>
-          <span className="min-w-[4rem] text-center text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="min-w-[4rem] text-center text-sm font-medium text-muted-foreground">
             {zoom}%
           </span>
           <motion.button
@@ -73,7 +73,7 @@ export function PDFViewerEnhanced({ url, fileName, totalPages }: PDFViewerProps)
             whileTap={{ scale: 0.95 }}
             onClick={handleZoomIn}
             disabled={zoom >= 200}
-            className="rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Zoom in"
           >
             <ZoomIn className="h-4 w-4" />
@@ -88,12 +88,12 @@ export function PDFViewerEnhanced({ url, fileName, totalPages }: PDFViewerProps)
               whileTap={{ scale: 0.95 }}
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:hover:bg-gray-700"
+              className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </motion.button>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
               {isMobile ? `${currentPage}/${totalPages}` : `Page ${currentPage} of ${totalPages}`}
             </span>
             <motion.button
@@ -101,7 +101,7 @@ export function PDFViewerEnhanced({ url, fileName, totalPages }: PDFViewerProps)
               whileTap={{ scale: 0.95 }}
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:hover:bg-gray-700"
+              className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />
@@ -122,24 +122,24 @@ export function PDFViewerEnhanced({ url, fileName, totalPages }: PDFViewerProps)
       </div>
 
       {/* PDF Iframe */}
-      <div className="relative flex-1 overflow-hidden rounded-b-2xl bg-gray-100 dark:bg-gray-800">
+      <div className="relative flex-1 overflow-hidden rounded-b-2xl bg-muted">
         {loading && !error && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm">
             <div className="text-center">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Loading PDF...</p>
+              <p className="mt-2 text-sm text-muted-foreground">Loading PDF...</p>
             </div>
           </div>
         )}
         
         {error ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-900">
+          <div className="absolute inset-0 flex items-center justify-center bg-card">
             <div className="text-center p-6">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-lg font-semibold text-card-foreground mb-2">
                 Failed to load PDF
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 The PDF preview could not be loaded. Try downloading the file instead.
               </p>
               <motion.button

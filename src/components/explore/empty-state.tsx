@@ -16,19 +16,19 @@ export function EmptyState({ type, searchTerm, onUpload, onCreateFolder }: Empty
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-300 bg-gray-50 py-16 dark:border-gray-700 dark:bg-gray-900/50"
+        className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border bg-muted py-16"
       >
         <motion.div
           animate={{ rotate: [0, 10, -10, 0] }}
           transition={{ duration: 0.5 }}
-          className="mb-4 rounded-full bg-gray-200 p-6 dark:bg-gray-800"
+          className="mb-4 rounded-full bg-muted p-6"
         >
-          <Search className="h-12 w-12 text-gray-400" />
+          <Search className="h-12 w-12 text-muted-foreground" />
         </motion.div>
-        <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+        <h3 className="mb-2 text-xl font-semibold text-card-foreground">
           No results found
         </h3>
-        <p className="text-center text-gray-600 dark:text-gray-400">
+        <p className="text-center text-muted-foreground">
           No files or folders match <span className="font-semibold">"{searchTerm}"</span>
           <br />
           Try a different search term
@@ -51,10 +51,10 @@ export function EmptyState({ type, searchTerm, onUpload, onCreateFolder }: Empty
         <FolderOpen className="h-16 w-16 text-white" />
       </motion.div>
 
-      <h3 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+      <h3 className="mb-2 text-2xl font-bold text-card-foreground">
         This folder is empty
       </h3>
-      <p className="mb-6 text-center text-gray-600 dark:text-gray-400">
+      <p className="mb-6 text-center text-muted-foreground">
         Upload files or create folders to get started
       </p>
 
@@ -75,7 +75,7 @@ export function EmptyState({ type, searchTerm, onUpload, onCreateFolder }: Empty
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={onCreateFolder}
-            className="flex items-center gap-2 rounded-xl border-2 border-gray-300 bg-white px-6 py-3 font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-xl border-2 border-border bg-background px-6 py-3 font-semibold text-card-foreground transition-colors hover:bg-accent"
           >
             <FolderOpen className="h-5 w-5" />
             New Folder

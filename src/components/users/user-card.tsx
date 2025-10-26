@@ -36,7 +36,7 @@ export function UserCard({ user, isCurrentUser, isAdmin, onDelete, onBlock, inde
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="group relative overflow-hidden rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:hover:border-blue-700"
+      className="group relative overflow-hidden rounded-2xl border-2 border-border bg-card p-6 shadow-sm transition-all hover:border-primary hover:shadow-lg"
     >
       {/* Online Indicator */}
       {user.is_online && (
@@ -51,7 +51,7 @@ export function UserCard({ user, isCurrentUser, isAdmin, onDelete, onBlock, inde
       {/* Avatar */}
       <div className="mb-4 flex justify-center">
         <div className="relative">
-          <Avatar className="h-20 w-20 ring-4 ring-gray-100 transition-all group-hover:ring-blue-200 dark:ring-gray-800 dark:group-hover:ring-blue-900/50">
+          <Avatar className="h-20 w-20 ring-4 ring-muted transition-all group-hover:ring-primary">
             <AvatarImage src={avatarUrl} alt={user.name} />
             <AvatarFallback className={`bg-gradient-to-br ${avatarColor} text-xl font-bold text-white`}>
               {initials}
@@ -69,7 +69,7 @@ export function UserCard({ user, isCurrentUser, isAdmin, onDelete, onBlock, inde
       {/* User Info */}
       <div className="space-y-3 text-center">
         <div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-bold text-card-foreground">
             {user.name}
             {isCurrentUser && (
               <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
@@ -79,12 +79,12 @@ export function UserCard({ user, isCurrentUser, isAdmin, onDelete, onBlock, inde
           </h3>
         </div>
 
-        <div className="flex items-center justify-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
           <Mail className="h-4 w-4" />
           <span className="truncate">{user.email}</span>
         </div>
 
-        <div className="flex items-center justify-center gap-1.5 text-xs text-gray-500 dark:text-gray-500">
+        <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>Joined {formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}</span>
         </div>
@@ -96,7 +96,7 @@ export function UserCard({ user, isCurrentUser, isAdmin, onDelete, onBlock, inde
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
             user.role === 'admin'
               ? 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 dark:from-amber-900/30 dark:to-orange-900/30 dark:text-amber-400'
-              : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+              : 'bg-muted text-muted-foreground'
           }`}
         >
           {user.role === 'admin' ? <Shield className="h-3.5 w-3.5" /> : <UserIcon className="h-3.5 w-3.5" />}
@@ -133,15 +133,15 @@ export function EmptyUsers({ searchTerm }: { searchTerm?: string }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 p-12 dark:border-gray-700 dark:bg-gray-800/50"
+      className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted p-12"
     >
-      <div className="mb-4 rounded-full bg-gray-200 p-6 dark:bg-gray-700">
-        <UserIcon className="h-12 w-12 text-gray-400" />
+      <div className="mb-4 rounded-full bg-muted p-6">
+        <UserIcon className="h-12 w-12 text-muted-foreground" />
       </div>
-      <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
+      <h3 className="mb-2 text-xl font-bold text-card-foreground">
         {searchTerm ? 'No users found' : 'No users yet'}
       </h3>
-      <p className="text-gray-600 dark:text-gray-400">
+      <p className="text-muted-foreground">
         {searchTerm ? `No users match "${searchTerm}"` : 'Users will appear here once they register'}
       </p>
     </motion.div>
@@ -155,7 +155,7 @@ export function UsersSkeleton() {
       {[...Array(6)].map((_, i) => (
         <div
           key={i}
-          className="h-64 animate-pulse rounded-2xl border-2 border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
+          className="h-64 animate-pulse rounded-2xl border-2 border-border bg-muted"
         />
       ))}
     </div>

@@ -23,10 +23,10 @@ export function EmptyNotesState({ onCreateNote }: EmptyNotesStateProps) {
           <FileText className="h-12 w-12 text-white" />
         </motion.div>
 
-        <h3 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+        <h3 className="mb-2 text-2xl font-bold text-card-foreground">
           No note selected
         </h3>
-        <p className="mb-6 text-gray-600 dark:text-gray-400">
+        <p className="mb-6 text-muted-foreground">
           Select a note from the sidebar or create a new one to get started
         </p>
 

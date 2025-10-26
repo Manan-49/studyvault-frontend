@@ -40,8 +40,8 @@ const activityConfig: Record<string, { icon: LucideIcon; color: string; bg: stri
 export function ActivityItem({ activity, index }: ActivityItemProps) {
   const config = activityConfig[activity.type] || { 
     icon: FileText, 
-    color: 'text-gray-600 dark:text-gray-400', 
-    bg: 'bg-gray-100 dark:bg-gray-800' 
+    color: 'text-muted-foreground', 
+    bg: 'bg-muted' 
   }
   const Icon = config.icon
 
@@ -53,7 +53,7 @@ export function ActivityItem({ activity, index }: ActivityItemProps) {
       whileHover={{ x: 4 }}
       className="group"
     >
-      <div className="flex gap-4 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-blue-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-blue-600">
+      <div className="flex gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary hover:shadow-md">
         {/* Icon */}
         <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${config.bg}`}>
           <Icon className={`h-6 w-6 ${config.color}`} />
@@ -63,14 +63,14 @@ export function ActivityItem({ activity, index }: ActivityItemProps) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
-              <h3 className="font-semibold capitalize text-gray-900 dark:text-white">
+              <h3 className="font-semibold capitalize text-card-foreground">
                 {activity.type.replace(/_/g, ' ')}
               </h3>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-1 text-sm text-muted-foreground">
                 By <span className="font-medium">{activity.user_name}</span>
               </p>
             </div>
-            <span className="text-sm text-gray-500 dark:text-gray-500">
+            <span className="text-sm text-muted-foreground">
               {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
             </span>
           </div>
@@ -80,15 +80,15 @@ export function ActivityItem({ activity, index }: ActivityItemProps) {
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
-              className="mt-3 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-800/50"
+              className="mt-3 overflow-hidden rounded-lg bg-muted"
             >
               <div className="p-3">
                 {Object.entries(activity.metadata).map(([key, value]) => (
                   <div key={key} className="flex items-center gap-2 text-xs">
-                    <span className="font-medium text-gray-700 dark:text-gray-300">
+                    <span className="font-medium text-card-foreground">
                       {key}:
                     </span>
-                    <span className="text-gray-600 dark:text-gray-400">
+                    <span className="text-muted-foreground">
                       {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                     </span>
                   </div>
@@ -108,15 +108,15 @@ export function EmptyActivity() {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-300 bg-gray-50 py-16 dark:border-gray-700 dark:bg-gray-900/50"
+      className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border bg-muted py-16"
     >
-      <div className="rounded-full bg-gray-200 p-6 dark:bg-gray-800">
+      <div className="rounded-full bg-muted p-6">
         <FileText className="h-12 w-12 text-gray-400" />
       </div>
-      <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="mt-4 text-lg font-semibold text-foreground">
         No activity yet
       </h3>
-      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+      <p className="mt-2 text-sm text-muted-foreground">
         Activity logs will appear here once you start using the app
       </p>
     </motion.div>
@@ -133,12 +133,12 @@ export function ActivitySkeleton() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1 }}
-          className="flex gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900"
+          className="flex gap-4 rounded-xl border border-border bg-card p-4"
         >
-          <div className="h-12 w-12 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-800" />
+          <div className="h-12 w-12 animate-pulse rounded-xl bg-muted" />
           <div className="flex-1 space-y-2">
-            <div className="h-5 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
-            <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
+            <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
           </div>
         </motion.div>
       ))}

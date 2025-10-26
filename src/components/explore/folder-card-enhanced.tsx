@@ -60,7 +60,7 @@ export function FolderCardEnhanced({ folder, onClick, onDelete, index }: FolderC
     >
       <div
         onClick={onClick}
-        className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900"
+        className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-xl"
       >
         {/* Gradient Background */}
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 transition-opacity group-hover:opacity-10`} />
@@ -98,13 +98,13 @@ export function FolderCardEnhanced({ folder, onClick, onDelete, index }: FolderC
           </div>
 
           {/* Folder Info */}
-          <h3 className="mb-1 truncate text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="mb-1 truncate text-lg font-semibold text-card-foreground">
             {folder.name}
           </h3>
-          <p className="mb-3 truncate text-xs text-gray-500 dark:text-gray-400">
+          <p className="mb-3 truncate text-xs text-muted-foreground">
             {folder.path}
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">
+          <p className="text-xs text-muted-foreground">
             {formatDistanceToNow(new Date(folder.created_at), { addSuffix: true })}
           </p>
         </div>

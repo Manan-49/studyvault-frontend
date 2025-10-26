@@ -110,11 +110,11 @@ export function FormatToolbar({ editor }: FormatToolbarProps) {
   ]
 
   return (
-    <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/80">
+    <div className="sticky top-0 z-10 border-b border-border bg-card/80 backdrop-blur-sm">
       <div className="flex flex-wrap items-center gap-1 p-2">
         {buttons.map((button, index) => {
           if ('divider' in button) {
-            return <div key={index} className="mx-1 h-6 w-px bg-gray-300 dark:bg-gray-700" />
+            return <div key={index} className="mx-1 h-6 w-px bg-border" />
           }
 
           const Icon = button.icon
@@ -130,7 +130,7 @@ export function FormatToolbar({ editor }: FormatToolbarProps) {
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
                 button.isActive
                   ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                  : 'bg-muted text-muted-foreground hover:bg-accent'
               } disabled:cursor-not-allowed disabled:opacity-40`}
             >
               <Icon className="h-4 w-4" />

@@ -35,7 +35,7 @@ export function ConfirmPasswordInput({
       {/* Input Container */}
       <div className="relative">
         {/* Lock Icon */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
           <Lock className="h-5 w-5" />
         </div>
 
@@ -49,15 +49,15 @@ export function ConfirmPasswordInput({
           autoComplete={autoComplete}
           placeholder={placeholder}
           className={`
-            peer h-14 w-full rounded-xl border-2 bg-white py-4 pl-12 pr-20 text-gray-900
+            peer h-14 w-full rounded-xl border-2 bg-background py-4 pl-12 pr-20 text-foreground
             transition-all duration-200 outline-none
-            dark:bg-gray-900 dark:text-white
+            dark:bg-background dark:text-foreground
             ${
               error
                 ? 'border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
                 : isValid && passwordMatch
                   ? 'border-green-500 focus:border-green-500 focus:ring-4 focus:ring-green-500/10'
-                  : 'border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:focus:border-blue-500'
+                  : 'border-border focus:border-primary focus:ring-4 focus:ring-primary/10'
             }
           `}
         />
@@ -133,7 +133,7 @@ export function ConfirmPasswordInput({
             onClick={() => setShowPassword(!showPassword)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="rounded-lg p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <AnimatePresence mode="wait" initial={false}>
               {showPassword ? (

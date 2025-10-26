@@ -22,7 +22,7 @@ export default function OfflinePage() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full"
       >
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-card rounded-2xl shadow-xl border border-border overflow-hidden">
           {/* Icon Header */}
           <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-8 flex justify-center">
             <motion.div

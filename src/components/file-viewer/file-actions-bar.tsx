@@ -29,10 +29,10 @@ export function FileActionsBar({ onDownload, onPrint, onShare, onGoToFolder }: F
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.95 }}
           onClick={action.onClick}
-          className="flex flex-col items-center gap-2 rounded-xl border-2 border-gray-200 bg-white p-3 transition-all hover:border-blue-300 hover:bg-blue-50 dark:border-gray-700 dark:bg-gray-900 dark:hover:border-blue-600 dark:hover:bg-blue-900/20"
+          className="flex flex-col items-center gap-2 rounded-xl border-2 border-border bg-card p-3 transition-all hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-600 dark:hover:bg-blue-900/20"
         >
-          <action.icon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
+          <action.icon className="h-5 w-5 text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground">{action.label}</span>
         </motion.button>
       ))}
     </div>

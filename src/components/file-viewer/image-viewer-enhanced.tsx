@@ -22,24 +22,24 @@ export function ImageViewerEnhanced({ url, alt }: ImageViewerProps) {
   return (
     <div className="flex h-full flex-col">
       {/* Controls */}
-      <div className="flex items-center justify-between rounded-t-2xl border-b border-gray-200 bg-white/80 p-3 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/80">
+      <div className="flex items-center justify-between rounded-t-2xl border-b border-border bg-card/80 p-3 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleZoomOut}
-            className="rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent"
           >
             <ZoomOut className="h-4 w-4" />
           </motion.button>
-          <span className="min-w-[4rem] text-center text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="min-w-[4rem] text-center text-sm font-medium text-muted-foreground">
             {zoom}%
           </span>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleZoomIn}
-            className="rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent"
           >
             <ZoomIn className="h-4 w-4" />
           </motion.button>
@@ -50,7 +50,7 @@ export function ImageViewerEnhanced({ url, alt }: ImageViewerProps) {
             whileHover={{ scale: 1.05, rotate: 90 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleRotate}
-            className="rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent"
           >
             <RotateCw className="h-4 w-4" />
           </motion.button>
@@ -66,7 +66,7 @@ export function ImageViewerEnhanced({ url, alt }: ImageViewerProps) {
       </div>
 
       {/* Image Display */}
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-b-2xl bg-gray-100 dark:bg-gray-900">
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-b-2xl bg-muted">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />

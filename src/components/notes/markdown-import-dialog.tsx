@@ -59,21 +59,21 @@ export function MarkdownImportDialog({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900"
+              className="w-full max-w-2xl overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-800">
+              <div className="flex items-center justify-between border-b border-border p-6">
                 <div className="flex items-center gap-3">
                   <div className="rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 p-2.5">
                     <FileText className="h-5 w-5 text-white" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-xl font-bold text-card-foreground">
                     Import Markdown
                   </h2>
                 </div>
                 <button
                   onClick={onClose}
-                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -83,12 +83,12 @@ export function MarkdownImportDialog({
               <form onSubmit={handleSubmit} className="p-6">
                 {/* File Upload */}
                 <div className="mb-4">
-                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Upload .md file (optional)
                   </label>
-                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 transition-colors hover:border-green-500 hover:bg-green-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-green-600 dark:hover:bg-green-900/20">
-                    <Upload className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted p-6 transition-colors hover:border-green-500 hover:bg-green-50 dark:hover:border-green-600 dark:hover:bg-green-900/20">
+                    <Upload className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
                       Click to upload Markdown file
                     </span>
                     <input
@@ -102,7 +102,7 @@ export function MarkdownImportDialog({
 
                 {/* Title */}
                 <div className="mb-4">
-                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Note Title
                   </label>
                   <input
@@ -111,13 +111,13 @@ export function MarkdownImportDialog({
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g., Study Checklist"
                     disabled={isLoading}
-                    className="h-12 w-full rounded-xl border-2 border-gray-200 px-4 outline-none transition-all focus:border-green-500 focus:ring-4 focus:ring-green-500/20 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                    className="h-12 w-full rounded-xl border-2 border-border px-4 outline-none transition-all focus:border-green-500 focus:ring-4 focus:ring-green-500/20 disabled:opacity-50"
                   />
                 </div>
 
                 {/* Markdown Content */}
                 <div className="mb-6">
-                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Markdown Content
                   </label>
                   <textarea
@@ -126,9 +126,9 @@ export function MarkdownImportDialog({
                     placeholder="# My Checklist&#10;&#10;## Chapter 1&#10;- [ ] Topic 1&#10;- [ ] Topic 2&#10;&#10;**Bold** and *italic* supported!"
                     rows={12}
                     disabled={isLoading}
-                    className="w-full rounded-xl border-2 border-gray-200 p-4 font-mono text-sm outline-none transition-all focus:border-green-500 focus:ring-4 focus:ring-green-500/20 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded-xl border-2 border-border p-4 font-mono text-sm outline-none transition-all focus:border-green-500 focus:ring-4 focus:ring-green-500/20 disabled:opacity-50"
                   />
-                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  <p className="mt-2 text-xs text-muted-foreground">
                     Supports: Headers (#, ##, ###), **bold**, *italic*, `code`, checkboxes (- [ ])
                   </p>
                 </div>
@@ -138,7 +138,7 @@ export function MarkdownImportDialog({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 rounded-xl border-2 border-gray-300 px-4 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                    className="flex-1 rounded-xl border-2 border-border px-4 py-3 font-semibold text-card-foreground transition-colors hover:bg-accent"
                   >
                     Cancel
                   </button>

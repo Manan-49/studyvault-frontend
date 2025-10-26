@@ -48,7 +48,7 @@ export function SearchBarEnhanced({
           }}
           transition={{ duration: 0.3 }}
         >
-          <Search className="h-5 w-5 text-gray-400" />
+          <Search className="h-5 w-5 text-muted-foreground" />
         </motion.div>
       </div>
 
@@ -58,7 +58,7 @@ export function SearchBarEnhanced({
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
-        className="h-12 w-full rounded-xl border-2 border-gray-200 bg-white pl-12 pr-20 text-gray-900 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:focus:border-blue-500"
+        className="h-12 w-full rounded-xl border-2 border-border bg-background pl-12 pr-20 text-foreground outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10"
       />
 
       {/* Result Count & Clear Button */}
@@ -85,7 +85,7 @@ export function SearchBarEnhanced({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleClear}
-              className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-gray-600 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
+              className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             >
               <X className="h-4 w-4" />
             </motion.button>

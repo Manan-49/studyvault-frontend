@@ -47,15 +47,15 @@ export function MoveFileDialog({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-full max-w-md overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900"
+              className="w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-800">
+              <div className="flex items-center justify-between border-b border-border p-6">
                 <div className="flex items-center gap-3">
                   <div className="rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 p-2.5">
                     <Move className="h-5 w-5 text-white" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-xl font-bold text-card-foreground">
                     Move File
                   </h2>
                 </div>
@@ -63,7 +63,7 @@ export function MoveFileDialog({
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={onClose}
-                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent"
                 >
                   <X className="h-5 w-5" />
                 </motion.button>
@@ -74,18 +74,18 @@ export function MoveFileDialog({
                 <div className="mb-6">
                   <label
                     htmlFor="destination"
-                    className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    className="mb-2 block text-sm font-medium text-card-foreground"
                   >
                     Select Destination
                   </label>
                   <div className="relative">
-                    <FolderOpen className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                    <FolderOpen className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                     <select
                       id="destination"
                       value={selectedFolderId}
                       onChange={(e) => setSelectedFolderId(e.target.value)}
                       disabled={isLoading}
-                      className="h-12 w-full appearance-none rounded-xl border-2 border-gray-200 bg-white pl-12 pr-10 text-gray-900 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                      className="h-12 w-full appearance-none rounded-xl border-2 border-border bg-background pl-12 pr-10 text-foreground outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:opacity-50"
                     >
                       <option value="">📁 Root (No Folder)</option>
                       {folders.map((folder) => (
@@ -96,7 +96,7 @@ export function MoveFileDialog({
                     </select>
                   </div>
                   {selectedFolderId === '' && (
-                    <p className="mt-2 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                       <Home className="h-3 w-3" />
                       File will be moved to the root directory
                     </p>
@@ -110,7 +110,7 @@ export function MoveFileDialog({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onClose}
-                    className="flex-1 rounded-xl border-2 border-gray-300 bg-white px-4 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    className="flex-1 rounded-xl border-2 border-border bg-background px-4 py-3 font-semibold text-card-foreground transition-colors hover:bg-accent"
                   >
                     Cancel
                   </motion.button>

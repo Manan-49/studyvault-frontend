@@ -27,9 +27,9 @@ export function StorageChart({ used, total }: StorageChartProps) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.3 }}
-      className="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:rounded-2xl sm:p-6"
+      className="w-full overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm sm:rounded-2xl sm:p-6"
     >
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white sm:text-base">
+      <h3 className="text-sm font-semibold text-card-foreground sm:text-base">
         Storage Usage
       </h3>
 
@@ -45,7 +45,7 @@ export function StorageChart({ used, total }: StorageChartProps) {
               stroke="currentColor"
               strokeWidth="10"
               fill="none"
-              className="text-gray-200 dark:text-gray-800"
+              className="text-muted/50"
             />
             {/* Progress Circle */}
             <motion.circle
@@ -70,11 +70,11 @@ export function StorageChart({ used, total }: StorageChartProps) {
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.8, type: 'spring' }}
-              className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl"
+              className="text-2xl font-bold text-card-foreground sm:text-3xl"
             >
               {percentage.toFixed(0)}%
             </motion.span>
-            <span className="text-[10px] text-gray-500 dark:text-gray-400 sm:text-xs">Used</span>
+            <span className="text-[10px] text-muted-foreground sm:text-xs">Used</span>
           </div>
         </div>
       </div>
@@ -82,19 +82,19 @@ export function StorageChart({ used, total }: StorageChartProps) {
       {/* Stats */}
       <div className="mt-4 space-y-2 sm:mt-6">
         <div className="flex items-center justify-between text-xs sm:text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Used</span>
-          <span className="font-semibold text-gray-900 dark:text-white">
+          <span className="text-muted-foreground">Used</span>
+          <span className="font-semibold text-card-foreground">
             {formatBytes(safeUsed)}
           </span>
         </div>
         <div className="flex items-center justify-between text-xs sm:text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Total</span>
-          <span className="font-semibold text-gray-900 dark:text-white">
+          <span className="text-muted-foreground">Total</span>
+          <span className="font-semibold text-card-foreground">
             {formatBytes(safeTotal)}
           </span>
         </div>
         <div className="flex items-center justify-between text-xs sm:text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Available</span>
+          <span className="text-muted-foreground">Available</span>
           <span className="font-semibold text-green-600 dark:text-green-400">
             {formatBytes(available)}
           </span>

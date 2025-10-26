@@ -157,21 +157,21 @@ export function FileUploadDialog({ currentFolderId, onSuccess }: FileUploadDialo
               onChange={handleFileChange}
               className="mt-1 cursor-pointer"
             />
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-xs text-muted-foreground">
               Supported: PDF, PNG, JPG (max 100MB per file)
             </p>
           </div>
 
           {files.length > 0 && (
-            <div className="max-h-40 space-y-2 overflow-y-auto rounded border border-gray-200 dark:border-gray-700 p-2">
+            <div className="max-h-40 space-y-2 overflow-y-auto rounded border border-border p-2">
               {files.map((file, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between rounded bg-gray-50 dark:bg-gray-800 p-2"
+                  className="flex items-center justify-between rounded bg-muted p-2"
                 >
-                  <span className="truncate text-sm text-gray-900 dark:text-gray-100">{file.name}</span>
+                  <span className="truncate text-sm text-card-foreground">{file.name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-muted-foreground">
                       {(file.size / 1024 / 1024).toFixed(2)} MB
                     </span>
                     <Button
@@ -191,7 +191,7 @@ export function FileUploadDialog({ currentFolderId, onSuccess }: FileUploadDialo
           <div>
             <Label htmlFor="folder">Upload Location</Label>
             <div className="relative mt-1">
-              <FolderOpen className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+              <FolderOpen className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <select
                 id="folder"
                 value={folderId}

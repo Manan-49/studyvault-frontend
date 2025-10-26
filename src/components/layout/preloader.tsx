@@ -20,10 +20,10 @@ export function Preloader() {
   if (!loading) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-card/80 backdrop-blur-sm">
       <div className="text-center">
         <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
-        <p className="mt-4 text-sm font-medium text-gray-600">Loading...</p>
+        <p className="mt-4 text-sm font-medium text-muted-foreground">Loading...</p>
       </div>
     </div>
   )

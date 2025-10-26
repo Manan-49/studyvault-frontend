@@ -33,7 +33,7 @@ const getStatusColor = (status: string) => {
     case 'failed':
       return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
     default:
-      return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+      return 'bg-muted text-muted-foreground'
   }
 }
 
@@ -49,7 +49,7 @@ export function RecentFileCard({ file, index }: RecentFileCardProps) {
       className="w-full"
     >
       <Link href={`/explore/${file.id}`} className="block w-full">
-        <div className="group relative w-full overflow-hidden rounded-lg border border-gray-200 bg-white p-3 transition-all hover:border-blue-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-blue-700 sm:rounded-xl sm:p-4">
+        <div className="group relative w-full overflow-hidden rounded-lg border border-border bg-card p-3 transition-all hover:border-primary hover:shadow-md sm:rounded-xl sm:p-4">
           {/* Hover gradient effect */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 transition-opacity group-hover:opacity-100 dark:from-blue-950/20 dark:to-indigo-950/20" />
 
@@ -65,10 +65,10 @@ export function RecentFileCard({ file, index }: RecentFileCardProps) {
 
             {/* Content */}
             <div className="min-w-0 flex-1">
-              <h4 className="truncate text-sm font-semibold text-gray-900 dark:text-white sm:text-base">
+              <h4 className="truncate text-sm font-semibold text-card-foreground sm:text-base">
                 {file.title}
               </h4>
-              <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+              <p className="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
                 {formatBytes(file.size_bytes)}
                 <span className="hidden sm:inline">
                   {' • '}

@@ -23,7 +23,7 @@ export function ThumbnailImage({ src, alt, mimeType, className = '' }: Thumbnail
     if (mimeType === 'application/pdf') {
       return <FileText className="h-16 w-16 text-red-400" />
     }
-    return <File className="h-16 w-16 text-gray-400" />
+    return <File className="h-16 w-16 text-muted-foreground" />
   }
 
   // Auto-retry once after 2 seconds
@@ -42,7 +42,7 @@ export function ThumbnailImage({ src, alt, mimeType, className = '' }: Thumbnail
 
   if (error || !src) {
     return (
-      <div className={`flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 ${className}`}>
+      <div className={`flex items-center justify-center bg-gradient-to-br from-muted to-muted/80 ${className}`}>
         {getFallbackIcon()}
       </div>
     )
@@ -51,7 +51,7 @@ export function ThumbnailImage({ src, alt, mimeType, className = '' }: Thumbnail
   return (
     <div className={`relative ${className}`}>
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+        <div className="absolute inset-0 flex items-center justify-center bg-muted">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       )}

@@ -171,7 +171,7 @@ export default function LoginContent() {
         className="relative z-10 w-full max-w-md"
       >
         {/* Glassmorphic Card */}
-        <div className="overflow-hidden rounded-3xl border border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/80">
+        <div className="overflow-hidden rounded-3xl borderborder-border/50 bg-card/80 shadow-2xl backdrop-blur-xl">
           {/* Card Content */}
           <div className="p-8 sm:p-10">
             {/* Logo & Title */}
@@ -202,7 +202,7 @@ export default function LoginContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-3xl font-bold text-gray-900 dark:text-white"
+                className="text-3xl font-bold text-foreground"
               >
                 Welcome Back!
               </motion.h1>
@@ -212,7 +212,7 @@ export default function LoginContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="mt-2 text-sm text-gray-600 dark:text-gray-400"
+                className="mt-2 text-sm text-muted-foreground"
               >
                 Sign in to continue to StudyVault
               </motion.p>
@@ -280,7 +280,7 @@ export default function LoginContent() {
               transition={{ delay: 0.9 }}
               className="mt-6 text-center"
             >
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Don&apos;t have an account?{' '}
                 <Link
                   href="/register"
@@ -299,7 +299,7 @@ export default function LoginContent() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1 }}
-          className="mt-4 text-center text-xs text-gray-500 dark:text-gray-500"
+          className="mt-4 text-center text-xs text-muted-foreground"
         >
           Secure login powered by StudyVault
         </motion.div>

@@ -22,17 +22,17 @@ export function FileBreadcrumb({ fileName, folderPath, folderId }: FileBreadcrum
       <Link href="/explore">
         <motion.div
           whileHover={{ scale: 1.05 }}
-          className="flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors hover:bg-accent"
         >
           <Home className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          <span className="font-medium text-gray-700 dark:text-gray-300">Root</span>
+          <span className="font-medium text-muted-foreground">Root</span>
         </motion.div>
       </Link>
 
       {pathSegments.map((segment, index) => (
         <div key={index} className="flex items-center gap-2">
           <ChevronRight className="h-4 w-4 text-gray-400" />
-          <span className="whitespace-nowrap text-gray-600 dark:text-gray-400">{segment}</span>
+          <span className="whitespace-nowrap text-muted-foreground">{segment}</span>
         </div>
       ))}
 

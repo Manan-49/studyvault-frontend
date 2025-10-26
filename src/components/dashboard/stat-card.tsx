@@ -30,7 +30,7 @@ export function StatCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 sm:rounded-2xl sm:p-6"
+      className="group relative overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-lg sm:rounded-2xl sm:p-6"
     >
       {/* Gradient background on hover */}
       <div className={`absolute inset-0 opacity-0 transition-opacity group-hover:opacity-5 ${gradient}`} />
@@ -39,14 +39,14 @@ export function StatCard({
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 sm:text-sm">
+            <p className="text-xs font-medium text-muted-foreground sm:text-sm">
               {title}
             </p>
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: delay + 0.2, type: 'spring', stiffness: 200 }}
-              className="mt-1 text-2xl font-bold text-gray-900 dark:text-white sm:mt-2 sm:text-3xl"
+              className="mt-1 text-2xl font-bold text-card-foreground sm:mt-2 sm:text-3xl"
             >
               {value}
             </motion.div>
@@ -64,7 +64,7 @@ export function StatCard({
 
         {/* Footer */}
         <div className="mt-3 flex items-center justify-between sm:mt-4">
-          <p className="text-[10px] text-gray-500 dark:text-gray-400 sm:text-xs">
+          <p className="text-[10px] text-muted-foreground sm:text-xs">
             {subtitle}
           </p>
           {trend && (

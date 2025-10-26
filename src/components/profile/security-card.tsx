@@ -60,7 +60,7 @@ export default function SecurityCard({ onPasswordChange }: SecurityCardProps) {
   const isValid = currentPassword && newPassword && confirmPassword && newPassword === confirmPassword && newPassword.length >= 8
 
   return (
-    <div className="h-full bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all">
+    <div className="h-full bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-all">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-6 py-4 border-b border-slate-200 dark:border-slate-700">
         <div className="flex items-center gap-2">

@@ -49,7 +49,7 @@ export default function ProfileInfoCard({
   }
 
   return (
-    <div className="h-full bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all">
+    <div className="h-full bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-all">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-6 py-4 border-b border-slate-200 dark:border-slate-700">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Profile Information</h2>

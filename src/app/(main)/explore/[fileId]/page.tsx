@@ -176,8 +176,8 @@ export default function FileViewPage() {
         <div className="rounded-full bg-red-100 p-6 dark:bg-red-900/30">
           <AlertCircle className="h-12 w-12 text-red-600 dark:text-red-400" />
         </div>
-        <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">File not found</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">{error || 'This file does not exist'}</p>
+        <h2 className="mt-4 text-2xl font-bold text-foreground">File not found</h2>
+        <p className="mt-2 text-muted-foreground">{error || 'This file does not exist'}</p>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -225,8 +225,8 @@ export default function FileViewPage() {
         return {
           icon: Clock,
           text: 'Pending',
-          color: 'text-gray-600 dark:text-gray-400',
-          bg: 'bg-gray-100 dark:bg-gray-800',
+          color: 'text-muted-foreground',
+          bg: 'bg-muted',
         }
     }
   }
@@ -247,16 +247,16 @@ export default function FileViewPage() {
             whileHover={{ scale: 1.05, x: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.back()}
-            className="flex items-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2 font-medium text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-4 py-2 font-medium text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Back</span>
           </motion.button>
           <div className="min-w-0">
-            <h1 className="truncate text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
+            <h1 className="truncate text-xl font-bold text-foreground sm:text-2xl">
               {file.title}
             </h1>
-            <p className="truncate text-sm text-gray-500 dark:text-gray-400">{file.filename}</p>
+            <p className="truncate text-sm text-muted-foreground">{file.filename}</p>
           </div>
         </div>
       </motion.div>
@@ -273,20 +273,20 @@ export default function FileViewPage() {
           transition={{ delay: 0.1 }}
           className="lg:col-span-2"
         >
-          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
             <div className="aspect-[4/3] md:aspect-auto md:h-[600px]">
               {loadingBlob ? (
-                <div className="flex h-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="flex h-full items-center justify-center bg-secondary">
                   <div className="text-center">
                     <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-                    <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading preview...</p>
+                    <p className="mt-4 text-sm text-muted-foreground">Loading preview...</p>
                   </div>
                 </div>
               ) : error ? (
-                <div className="flex h-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="flex h-full items-center justify-center bg-secondary">
                   <div className="text-center">
                     <AlertCircle className="mx-auto h-16 w-16 text-red-400" />
-                    <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mt-4 text-sm text-muted-foreground">
                       {error}
                     </p>
                     <motion.button
@@ -308,10 +308,10 @@ export default function FileViewPage() {
               ) : isImage && fileUrl ? (
                 <ImageViewerEnhanced url={fileUrl} alt={file.title} />
               ) : (
-                <div className="flex h-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="flex h-full items-center justify-center bg-secondary">
                   <div className="text-center">
                     <FileType className="mx-auto h-16 w-16 text-gray-400" />
-                    <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mt-4 text-sm text-muted-foreground">
                       Preview not available
                     </p>
                     <motion.button
@@ -337,8 +337,8 @@ export default function FileViewPage() {
           className="space-y-6"
         >
           {/* File Details */}
-          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-            <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">File Details</h2>
+          <div className="overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-lg">
+            <h2 className="mb-4 text-lg font-bold text-foreground">File Details</h2>
             <div className="space-y-4">
               <FileInfoCard
                 icon={HardDrive}
@@ -400,9 +400,9 @@ export default function FileViewPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-900"
+            className="overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-lg"
           >
-            <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Quick Actions</h2>
+            <h2 className="mb-4 text-lg font-bold text-foreground">Quick Actions</h2>
             <FileActionsBar
               onDownload={handleDownload}
               onPrint={isPDF ? handlePrint : undefined}

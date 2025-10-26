@@ -74,28 +74,28 @@ const CommandsList = forwardRef<any, CommandsListProps>((props, ref) => {
   }))
 
   return (
-    <div className="z-50 w-72 rounded-lg border border-gray-200 bg-white p-2 shadow-xl">
+    <div className="z-50 w-72 rounded-lg border border-border bg-card p-2 shadow-xl">
       {props.items.length ? (
         props.items.map((item, index) => (
           <button
             key={index}
             className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
-              index === selectedIndex ? 'bg-blue-100 text-blue-900' : 'hover:bg-gray-100'
+              index === selectedIndex ? 'bg-primary/10 text-primary' : 'hover:bg-accent'
             }`}
             onClick={() => selectItem(index)}
             type="button"
           >
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded border border-gray-200 bg-white">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded border border-border bg-background">
               {item.icon}
             </div>
             <div className="flex-1 overflow-hidden">
               <div className="truncate font-medium">{item.title}</div>
-              <div className="truncate text-xs text-gray-500">{item.description}</div>
+              <div className="truncate text-xs text-muted-foreground">{item.description}</div>
             </div>
           </button>
         ))
       ) : (
-        <div className="px-3 py-2 text-sm text-gray-500">No results</div>
+        <div className="px-3 py-2 text-sm text-muted-foreground">No results</div>
       )}
     </div>
   )

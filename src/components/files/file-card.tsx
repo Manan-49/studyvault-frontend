@@ -50,7 +50,7 @@ export function FileCard({ file, onDelete, onEdit }: FileCardProps) {
   return (
     <Card className="transition-shadow hover:shadow-lg">
       <CardContent className="p-4">
-        <div className="relative mb-4 aspect-video overflow-hidden rounded-lg bg-gray-100">
+        <div className="relative mb-4 aspect-video overflow-hidden rounded-lg bg-muted">
           {thumbnailUrl && !imageError ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

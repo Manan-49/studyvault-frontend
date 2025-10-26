@@ -173,11 +173,11 @@ export default function AvatarUploadModal({
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 className="w-full max-w-2xl"
               >
-                <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div className="bg-card rounded-2xl shadow-2xl overflow-hidden">
                   {/* Header */}
                   <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 px-6 py-5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                      <div className="p-2 bg-card/20 rounded-lg backdrop-blur-sm">
                         <ImageIcon className="h-5 w-5 text-white" />
                       </div>
                       <div>
@@ -187,7 +187,7 @@ export default function AvatarUploadModal({
                     </div>
                     <button
                       onClick={handleClose}
-                      className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-lg transition-all"
+                      className="text-white/80 hover:text-white hover:bg-card/20 p-2 rounded-lg transition-all"
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -277,7 +277,7 @@ export default function AvatarUploadModal({
                             <div className="flex items-center gap-3">
                               <button
                                 onClick={handleZoomOut}
-                                className="p-2.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 hover:border-slate-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-2.5 rounded-lg bg-card border border-border hover:bg-accent hover:border-border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={zoom <= 1}
                               >
                                 <ZoomOut className="h-4 w-4 text-slate-700" />
@@ -296,7 +296,7 @@ export default function AvatarUploadModal({
                               />
                               <button
                                 onClick={handleZoomIn}
-                                className="p-2.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 hover:border-slate-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-2.5 rounded-lg bg-card border border-border hover:bg-accent hover:border-border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={zoom >= 3}
                               >
                                 <ZoomIn className="h-4 w-4 text-slate-700" />
@@ -308,14 +308,14 @@ export default function AvatarUploadModal({
                           <div className="flex gap-3">
                             <button
                               onClick={handleRotate}
-                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-slate-300 hover:border-blue-500 hover:bg-blue-50 rounded-xl transition-all font-medium text-slate-700 hover:text-blue-700"
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-card border-2 border-border hover:border-primary hover:bg-primary/10 rounded-xl transition-all font-medium text-card-foreground hover:text-primary"
                             >
                               <RotateCw className="h-4 w-4" />
                               Rotate 90°
                             </button>
                             <button
                               onClick={handleChangeImage}
-                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-slate-300 hover:border-purple-500 hover:bg-purple-50 rounded-xl transition-all font-medium text-slate-700 hover:text-purple-700"
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-card border-2 border-border hover:border-purple-500 hover:bg-purple-50 rounded-xl transition-all font-medium text-card-foreground hover:text-purple-700"
                             >
                               <Upload className="h-4 w-4" />
                               Change Image

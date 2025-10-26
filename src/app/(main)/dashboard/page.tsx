@@ -82,10 +82,10 @@ export default function DashboardPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
             <Activity className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="mb-2 text-lg font-semibold text-foreground">
             Something went wrong
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{error}</p>
+          <p className="text-sm text-muted-foreground">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
@@ -104,7 +104,7 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-5 dark:border-gray-800 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 sm:rounded-3xl sm:p-6 lg:p-8"
+        className="relative w-full overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-5 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 sm:rounded-3xl sm:p-6 lg:p-8"
       >
         {/* Decorative blur circles - CONTAINED */}
         <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-blue-400/20 blur-3xl sm:-right-20 sm:-top-20 sm:h-64 sm:w-64" />
@@ -118,7 +118,7 @@ export default function DashboardPage() {
               transition={{ delay: 0.2 }}
               className="flex items-center gap-2"
             >
-              <h1 className="truncate text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl md:text-4xl">
+              <h1 className="truncate text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
                 {getGreeting()}!
               </h1>
               <motion.div
@@ -133,7 +133,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:mt-2 sm:text-base"
+              className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base"
             >
               Here's what's happening with your vault today
             </motion.p>
@@ -215,10 +215,10 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:rounded-2xl sm:p-6"
+            className="w-full overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm sm:rounded-2xl sm:p-6"
           >
             <div className="mb-4 flex items-center justify-between sm:mb-6">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white sm:text-lg">
+              <h3 className="text-base font-semibold text-card-foreground sm:text-lg">
                 Recent Files
               </h3>
               <Link href="/explore">
@@ -244,13 +244,13 @@ export default function DashboardPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center justify-center py-12 sm:py-16"
               >
-                <div className="mb-3 rounded-full bg-gray-100 p-4 dark:bg-gray-800 sm:mb-4 sm:p-6">
-                  <FileText className="h-10 w-10 text-gray-400 sm:h-12 sm:w-12" />
+                <div className="mb-3 rounded-full bg-muted p-4 sm:mb-4 sm:p-6">
+                  <FileText className="h-10 w-10 text-muted-foreground sm:h-12 sm:w-12" />
                 </div>
-                <h4 className="mb-1 text-sm font-semibold text-gray-900 dark:text-white sm:mb-2 sm:text-base">
+                <h4 className="mb-1 text-sm font-semibold text-foreground sm:mb-2 sm:text-base">
                   No files yet
                 </h4>
-                <p className="mb-3 text-center text-xs text-gray-600 dark:text-gray-400 sm:mb-4 sm:text-sm">
+                <p className="mb-3 text-center text-xs text-muted-foreground sm:mb-4 sm:text-sm">
                   Upload your first file to get started
                 </p>
                 <Link href="/explore">

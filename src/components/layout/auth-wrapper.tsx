@@ -62,10 +62,10 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
   // Show loading state while verifying auth
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Loading...</p>
+          <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     )

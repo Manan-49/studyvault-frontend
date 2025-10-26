@@ -7,8 +7,8 @@ export function DashboardSkeleton() {
     <div className="space-y-8">
       {/* Header Skeleton */}
       <div className="space-y-2">
-        <div className="h-8 w-64 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800" />
-        <div className="h-4 w-96 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
+        <div className="h-8 w-64 animate-pulse rounded-lg bg-muted" />
+        <div className="h-4 w-96 animate-pulse rounded bg-muted" />
       </div>
 
       {/* Stats Grid Skeleton */}
@@ -19,7 +19,7 @@ export function DashboardSkeleton() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="h-32 animate-pulse rounded-2xl bg-gray-200 dark:bg-gray-800"
+            className="h-32 animate-pulse rounded-2xl bg-muted"
           />
         ))}
       </div>
@@ -27,11 +27,11 @@ export function DashboardSkeleton() {
       {/* Content Skeleton */}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <div className="h-96 animate-pulse rounded-2xl bg-gray-200 dark:bg-gray-800" />
+          <div className="h-96 animate-pulse rounded-2xl bg-muted" />
         </div>
         <div className="space-y-6">
-          <div className="h-64 animate-pulse rounded-2xl bg-gray-200 dark:bg-gray-800" />
-          <div className="h-64 animate-pulse rounded-2xl bg-gray-200 dark:bg-gray-800" />
+          <div className="h-64 animate-pulse rounded-2xl bg-muted" />
+          <div className="h-64 animate-pulse rounded-2xl bg-muted" />
         </div>
       </div>
     </div>

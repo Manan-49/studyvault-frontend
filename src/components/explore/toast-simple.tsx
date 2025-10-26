@@ -53,7 +53,7 @@ export function ToastSimple({ show, message, type, onClose }: ToastProps) {
               </p>
               <button
                 onClick={onClose}
-                className="flex-shrink-0 rounded-lg p-1 transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+                className="flex-shrink-0 rounded-lg p-1 transition-colors hover:bg-accent"
               >
                 <X className="h-4 w-4" />
               </button>

@@ -59,7 +59,7 @@ export function NoteEditorSimple({
     },
     editorProps: {
       attributes: {
-        class: 'focus:outline-none min-h-[500px] px-6 py-4 max-w-4xl mx-auto prose prose-lg dark:prose-invert prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-ul:list-disc prose-ol:list-decimal prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:italic',
+        class: 'focus:outline-none min-h-[500px] px-6 py-4 max-w-4xl mx-auto prose prose-lg dark:prose-invert prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-foreground prose-ul:list-disc prose-ol:list-decimal prose-li:text-foreground prose-code:bg-muted prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic',
       },
     },
   })
@@ -116,14 +116,14 @@ export function NoteEditorSimple({
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading editor...</p>
+          <p className="mt-2 text-sm text-muted-foreground">Loading editor...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-gray-900" dir="ltr">
+    <div className="flex h-full flex-col bg-card" dir="ltr">
       {editable && <FormatToolbar editor={editor} />}
       <div className="flex-1 overflow-y-auto" dir="ltr" ref={editorRef}>
         <EditorContent editor={editor} />

@@ -17,12 +17,12 @@ export function LoadingGrid({ count = 8, viewMode = 'grid' }: LoadingGridProps) 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900"
+            className="flex items-center gap-4 rounded-xl border border-border bg-card p-4"
           >
-            <div className="h-12 w-12 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800" />
+            <div className="h-12 w-12 animate-pulse rounded-lg bg-muted" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
-              <div className="h-3 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
+              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
             </div>
           </motion.div>
         ))}
@@ -38,15 +38,15 @@ export function LoadingGrid({ count = 8, viewMode = 'grid' }: LoadingGridProps) 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
-          className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
+          className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
         >
-          <div className="aspect-[4/3] animate-pulse bg-gray-200 dark:bg-gray-800" />
+          <div className="aspect-[4/3] animate-pulse bg-muted" />
           <div className="p-4 space-y-3">
-            <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
-            <div className="h-3 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
+            <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
             <div className="flex justify-between">
-              <div className="h-3 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
-              <div className="h-3 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
+              <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-20 animate-pulse rounded bg-muted" />
             </div>
           </div>
         </motion.div>

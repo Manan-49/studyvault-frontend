@@ -18,7 +18,7 @@ export function ViewToggle({ view, onChange }: ViewToggleProps) {
   ]
 
   return (
-    <div className="flex items-center gap-1 rounded-xl border-2 border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-900">
+    <div className="flex items-center gap-1 rounded-xl border-2 border-border bg-background p-1">
       {views.map(({ mode, icon: Icon, label }) => (
         <motion.button
           key={mode}
@@ -28,7 +28,7 @@ export function ViewToggle({ view, onChange }: ViewToggleProps) {
           className={`relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             view === mode
               ? 'text-blue-700 dark:text-blue-300'
-              : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
         >
           {view === mode && (

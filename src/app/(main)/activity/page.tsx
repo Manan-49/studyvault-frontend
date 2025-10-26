@@ -92,10 +92,10 @@ export default function ActivityPage() {
         className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
             📊 Activity Log
           </h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-muted-foreground">
             Track all actions and events across your account
           </p>
         </div>
@@ -106,7 +106,7 @@ export default function ActivityPage() {
           whileTap={{ scale: 0.95 }}
           onClick={handleExportCSV}
           disabled={exporting}
-          className="flex items-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 font-semibold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:bg-gray-800"
+          className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-4 py-2.5 font-semibold text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
         >
           <Download className="h-5 w-5" />
           <span>{exporting ? 'Exporting...' : 'Export CSV'}</span>
@@ -128,12 +128,12 @@ export default function ActivityPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search activities..."
-            className="h-12 w-full rounded-xl border-2 border-gray-200 bg-white pl-12 pr-12 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+            className="h-12 w-full rounded-xl border-2 border-border bg-background pl-12 pr-12 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/20 text-foreground"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               <X className="h-5 w-5" />
             </button>
@@ -146,7 +146,7 @@ export default function ActivityPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="h-12 w-full appearance-none rounded-xl border-2 border-gray-200 bg-white pl-12 pr-10 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+            className="h-12 w-full appearance-none rounded-xl border-2 border-border bg-background pl-12 pr-10 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/20 text-foreground"
           >
             <option value="">All Types</option>
             <option value="file_uploaded">File Uploaded</option>
@@ -191,14 +191,14 @@ export default function ActivityPage() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="flex items-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2 font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-4 py-2 font-medium text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
           >
             <ChevronLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Previous</span>
           </motion.button>
 
           <div className="flex items-center gap-2 px-4">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-foreground">
               Page {page} of {totalPages}
             </span>
           </div>
@@ -208,7 +208,7 @@ export default function ActivityPage() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="flex items-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2 font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-4 py-2 font-medium text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
           >
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="h-4 w-4" />

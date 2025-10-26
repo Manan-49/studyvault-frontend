@@ -1,5 +1,3 @@
-// src/app/(main)/explore/page.tsx
-
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -376,10 +374,10 @@ export default function ExplorePage() {
         className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
             📂 Explore
           </h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-muted-foreground">
             {isShowingSearchResults
               ? `Search results for "${debouncedSearch}"`
               : 'Browse and organize your files'}
@@ -392,7 +390,7 @@ export default function ExplorePage() {
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsCreateFolderOpen(true)}
-            className="flex items-center gap-2 rounded-xl border-2 border-gray-300 bg-white px-4 py-2.5 font-semibold text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-4 py-2.5 font-semibold text-card-foreground transition-all hover:bg-accent hover:text-accent-foreground"
           >
             <Plus className="h-5 w-5" />
             <span className="hidden sm:inline">New Folder</span>
@@ -442,7 +440,7 @@ export default function ExplorePage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="h-12 w-full appearance-none rounded-xl border-2 border-gray-200 bg-white px-4 pr-10 text-sm font-medium text-gray-900 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white sm:w-auto"
+              className="h-12 w-full appearance-none rounded-xl border-2 border-border bg-background px-4 pr-10 text-sm font-medium text-foreground outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 sm:w-auto"
             >
               <option value="date-desc">📅 Newest First</option>
               <option value="date-asc">📅 Oldest First</option>
@@ -451,7 +449,7 @@ export default function ExplorePage() {
               <option value="size-desc">💾 Largest First</option>
               <option value="size-asc">💾 Smallest First</option>
             </select>
-            <ArrowUpDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <ArrowUpDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
 
           {/* View Toggle */}
@@ -482,7 +480,7 @@ export default function ExplorePage() {
               <motion.h2
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="mb-4 text-lg font-semibold text-gray-900 dark:text-white"
+                className="mb-4 text-lg font-semibold text-foreground"
               >
                 📁 Folders ({filteredFolders.length})
               </motion.h2>
@@ -517,11 +515,11 @@ export default function ExplorePage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="mb-4 text-lg font-semibold text-gray-900 dark:text-white"
+                className="mb-4 text-lg font-semibold text-foreground"
               >
                 📄 Files ({filteredFiles.length})
                 {isShowingSearchResults && (
-                  <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                  <span className="ml-2 text-sm font-normal text-muted-foreground">
                     (including OCR matches)
                   </span>
                 )}

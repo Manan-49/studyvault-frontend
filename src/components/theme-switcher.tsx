@@ -32,7 +32,7 @@ export function ThemeSwitcher() {
 
   if (!mounted) {
     return (
-      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-border bg-card shadow-sm">
         <Sun className="h-4 w-4 text-orange-500" />
       </div>
     )
@@ -44,7 +44,7 @@ export function ThemeSwitcher() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-border bg-card shadow-sm transition-colors hover:bg-accent"
           aria-label="Toggle theme"
         >
           <Icon className={`h-4 w-4 ${currentTheme.color}`} />

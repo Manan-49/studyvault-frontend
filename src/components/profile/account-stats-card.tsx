@@ -51,7 +51,7 @@ export default function AccountStatsCard({ stats, loading }: AccountStatsCardPro
   ]
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200">
         <h2 className="text-lg font-semibold text-slate-900">Account Statistics</h2>

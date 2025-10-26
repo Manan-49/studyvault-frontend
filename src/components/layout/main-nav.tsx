@@ -52,7 +52,7 @@ export function MainNav() {
   return (
     <>
       {/* Desktop & Mobile Top Bar */}
-      <nav className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <nav className="sticky top-0 z-50 w-full border-b border-border bg-card shadow-sm">
         <div className="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-8">
           <div className="flex h-14 items-center justify-between sm:h-16">
             {/* Logo & Desktop Navigation */}
@@ -69,7 +69,7 @@ export function MainNav() {
                     priority
                   />
                 </div>
-                <span className="hidden text-lg font-bold text-gray-900 dark:text-white sm:block sm:text-xl">
+                <span className="hidden text-lg font-bold text-foreground sm:block sm:text-xl">
                   StudyVault
                 </span>
               </Link>
@@ -85,7 +85,7 @@ export function MainNav() {
                         className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                           isActive
                             ? 'bg-blue-600 text-white shadow-md'
-                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                         }`}
                       >
                         <Icon className="h-4 w-4" />
@@ -104,7 +104,7 @@ export function MainNav() {
 
               {/* Profile */}
               <Link href="/profile">
-                <button className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 sm:px-3 sm:py-2">
+                <button className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-3 sm:py-2">
                   <div className="relative flex-shrink-0">
                     <div className="h-7 w-7 overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 sm:h-8 sm:w-8">
                       {avatarUrl ? (
@@ -133,7 +133,7 @@ export function MainNav() {
               {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                 title="Logout"
               >
                 <LogOut className="h-4 w-4" />
@@ -145,7 +145,7 @@ export function MainNav() {
 
       {/* Mobile Bottom Navigation */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 z-[100] w-full border-t border-gray-200 bg-white/95 backdrop-blur-lg dark:border-gray-800 dark:bg-gray-900/95 md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[100] w-full border-t border-border bg-card/95 backdrop-blur-lg md:hidden"
         style={{ WebkitBackdropFilter: 'blur(12px)' }}
       >
         <div className="mx-auto grid w-full max-w-7xl grid-cols-5 px-2 py-1 safe-area-inset-bottom">
@@ -158,7 +158,7 @@ export function MainNav() {
                   className={`relative flex w-full max-w-[80px] flex-col items-center justify-center gap-1 rounded-lg py-2 transition-colors ${
                     isActive
                       ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-600 dark:text-gray-400'
+                      : 'text-muted-foreground'
                   }`}
                 >
                   <Icon className={`h-5 w-5 ${isActive ? 'drop-shadow-lg' : ''}`} />

@@ -47,52 +47,51 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
   }
-}
 
-.amoled {
-  --background: 0 0% 0%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 0%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 0%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 0%;
-  --secondary: 0 0% 5%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 5%;
-  --muted-foreground: 0 0% 64.9%;
-  --accent: 0 0% 5%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 10%;
-  --input: 0 0% 10%;
-  --ring: 0 0% 83.9%;
-}
+  .amoled {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 5%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 5%;
+    --muted-foreground: 0 0% 64.9%;
+    --accent: 0 0% 5%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 10%;
+    --input: 0 0% 10%;
+    --ring: 0 0% 83.9%;
+  }
 
-.night {
-  --background: 220 26% 14%;
-  --foreground: 210 40% 98%;
-  --card: 220 26% 14%;
-  --card-foreground: 210 40% 98%;
-  --popover: 220 26% 14%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 96%;
-  --primary-foreground: 220 26% 14%;
-  --secondary: 220 20% 20%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 220 20% 20%;
-  --muted-foreground: 215 20% 65%;
-  --accent: 220 20% 20%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 220 20% 20%;
-  --input: 220 20% 20%;
-  --ring: 210 40% 80%;
+  .night {
+    --background: 220 26% 14%;
+    --foreground: 210 40% 98%;
+    --card: 220 26% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 26% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 96%;
+    --primary-foreground: 220 26% 14%;
+    --secondary: 220 20% 20%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 20% 20%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 220 20% 20%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 210 40% 80%;
+  }
 }
-
 
 @layer base {
   * {
@@ -105,7 +104,9 @@
   }
   
   body {
-    @apply overflow-x-hidden bg-gray-50 text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100;
+    @apply overflow-x-hidden antialiased;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     width: 100%;
     max-width: 100vw;
   }
@@ -135,7 +136,9 @@
   color: #1a1a1a;
 }
 
-.dark .ProseMirror h1 {
+.dark .ProseMirror h1,
+.amoled .ProseMirror h1,
+.night .ProseMirror h1 {
   color: #ffffff;
 }
 
@@ -148,7 +151,9 @@
   color: #1a1a1a;
 }
 
-.dark .ProseMirror h2 {
+.dark .ProseMirror h2,
+.amoled .ProseMirror h2,
+.night .ProseMirror h2 {
   color: #ffffff;
 }
 
@@ -161,7 +166,9 @@
   color: #1a1a1a;
 }
 
-.dark .ProseMirror h3 {
+.dark .ProseMirror h3,
+.amoled .ProseMirror h3,
+.night .ProseMirror h3 {
   color: #ffffff;
 }
 
@@ -246,7 +253,9 @@
   color: #6b7280;
 }
 
-.dark .ProseMirror blockquote {
+.dark .ProseMirror blockquote,
+.amoled .ProseMirror blockquote,
+.night .ProseMirror blockquote {
   border-left-color: #60a5fa;
   color: #9ca3af;
 }
@@ -270,7 +279,9 @@
   font-size: 0.875em;
 }
 
-.dark .ProseMirror code {
+.dark .ProseMirror code,
+.amoled .ProseMirror code,
+.night .ProseMirror code {
   background: #334155;
   color: #fca5a5;
 }
@@ -288,7 +299,9 @@
   margin: 2rem 0;
 }
 
-.dark .ProseMirror hr {
+.dark .ProseMirror hr,
+.amoled .ProseMirror hr,
+.night .ProseMirror hr {
   border-top-color: #374151;
 }
 
@@ -301,7 +314,9 @@
   height: 0;
 }
 
-.dark .ProseMirror p.is-editor-empty:first-child::before {
+.dark .ProseMirror p.is-editor-empty:first-child::before,
+.amoled .ProseMirror p.is-editor-empty:first-child::before,
+.night .ProseMirror p.is-editor-empty:first-child::before {
   color: #6b7280;
 }
 

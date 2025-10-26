@@ -179,9 +179,9 @@ export default function NotesPage() {
     : 0
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] w-full flex-col overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-[calc(100vh-8rem)] w-full flex-col overflow-hidden bg-background">
       {/* Mobile Header */}
-      <div className="border-b border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 lg:hidden">
+      <div className="border-b border-border bg-card p-4 lg:hidden">
         <div className="flex items-center justify-between">
           {selectedNote ? (
             <button
@@ -189,13 +189,13 @@ export default function NotesPage() {
                 setSelectedNote(null)
                 setEditorContent('')
               }}
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-400"
+              className="flex items-center gap-2 text-muted-foreground"
             >
               <ArrowLeft className="h-5 w-5" />
               <span className="font-medium">Back to Notes</span>
             </button>
           ) : (
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">📝 Notes</h1>
+            <h1 className="text-xl font-bold text-card-foreground">📝 Notes</h1>
           )}
         </div>
       </div>
@@ -204,7 +204,7 @@ export default function NotesPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div
-          className={`w-full border-r border-gray-200 dark:border-gray-800 lg:w-80 ${
+          className={`w-full border-r border-border lg:w-80 ${
             selectedNote ? 'hidden lg:block' : 'block'
           }`}
         >
@@ -227,12 +227,12 @@ export default function NotesPage() {
           }`}
         >
           {selectedNote ? (
-            <div className="flex h-full flex-col bg-white dark:bg-gray-900">
+            <div className="flex h-full flex-col bg-card">
               {/* Editor Header */}
-              <div className="border-b border-gray-200 bg-gradient-to-r from-white to-gray-50 p-4 dark:border-gray-800 dark:from-gray-900 dark:to-gray-800">
+              <div className="border-b border-border bg-gradient-to-r from-card to-muted p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0 flex-1">
-                    <h1 className="truncate text-2xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="truncate text-2xl font-bold text-foreground">
                       {selectedNote.title}
                     </h1>
                     <div className="mt-2 flex items-center gap-3">

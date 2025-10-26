@@ -212,17 +212,17 @@ export function RichEditor({
 
   if (!mounted || !editor) {
     return (
-      <div className="flex h-96 items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
-        <p className="text-gray-500">Loading editor...</p>
+      <div className="flex h-96 items-center justify-center rounded-lg border border-border bg-muted">
+        <p className="text-muted-foreground">Loading editor...</p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-lg border border-gray-200">
+    <div className="rounded-lg border border-border">
       {/* Toolbar */}
       {editable && (
-        <div className="flex flex-wrap gap-1 border-b border-gray-200 bg-gray-50 p-2">
+        <div className="flex flex-wrap gap-1 border-b border-border bg-muted p-2">
           <Button
             size="sm"
             variant={editor.isActive('bold') ? 'default' : 'ghost'}
@@ -241,7 +241,7 @@ export function RichEditor({
           >
             <Italic className="h-4 w-4" />
           </Button>
-          <div className="mx-1 w-px bg-gray-300" />
+          <div className="mx-1 w-px bg-border" />
           <Button
             size="sm"
             variant={editor.isActive('heading', { level: 1 }) ? 'default' : 'ghost'}
@@ -258,7 +258,7 @@ export function RichEditor({
           >
             <Heading2 className="h-4 w-4" />
           </Button>
-          <div className="mx-1 w-px bg-gray-300" />
+          <div className="mx-1 w-px bg-border" />
           <Button
             size="sm"
             variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
@@ -283,7 +283,7 @@ export function RichEditor({
           >
             <CheckSquare className="h-4 w-4" />
           </Button>
-          <div className="mx-1 w-px bg-gray-300" />
+          <div className="mx-1 w-px bg-border" />
           <Button
             size="sm"
             variant={editor.isActive('blockquote') ? 'default' : 'ghost'}
@@ -300,7 +300,7 @@ export function RichEditor({
           >
             <Code className="h-4 w-4" />
           </Button>
-          <div className="mx-1 w-px bg-gray-300" />
+          <div className="mx-1 w-px bg-border" />
           <Button
             size="sm"
             variant="ghost"

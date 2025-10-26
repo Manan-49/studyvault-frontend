@@ -36,7 +36,7 @@ export default function Toast({ message, type, onClose }: ToastProps) {
           
           <button
             onClick={onClose}
-            className="ml-2 hover:bg-white/20 rounded-lg p-1 transition-colors"
+            className="ml-2 hover:bg-card/20 rounded-lg p-1 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>

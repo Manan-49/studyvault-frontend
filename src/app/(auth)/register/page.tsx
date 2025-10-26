@@ -214,7 +214,7 @@ export default function RegisterPage() {
         className="relative z-10 w-full max-w-md"
       >
         {/* Glassmorphic Card */}
-        <div className="overflow-hidden rounded-3xl border border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/80">
+        <div className="overflow-hidden rounded-3xl borderborder-border/50 bg-card/80 shadow-2xl backdrop-blur-xl">
           {/* Card Content */}
           <div className="p-8 sm:p-10">
             {/* Logo & Title */}
@@ -245,7 +245,7 @@ export default function RegisterPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-3xl font-bold text-gray-900 dark:text-white"
+                className="text-3xl font-bold text-foreground"
               >
                 Create Account
               </motion.h1>
@@ -255,7 +255,7 @@ export default function RegisterPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="mt-2 text-sm text-gray-600 dark:text-gray-400"
+                className="mt-2 text-sm text-muted-foreground"
               >
                 Join StudyVault and start organizing
               </motion.p>
@@ -360,7 +360,7 @@ export default function RegisterPage() {
               transition={{ delay: 1.1 }}
               className="mt-6 text-center"
             >
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{' '}
                 <Link
                   href="/login"
@@ -379,7 +379,7 @@ export default function RegisterPage() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.2 }}
-          className="mt-4 text-center text-xs text-gray-500 dark:text-gray-500"
+          className="mt-4 text-center text-xs text-muted-foreground"
         >
           Secure registration powered by StudyVault
         </motion.div>

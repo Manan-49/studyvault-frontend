@@ -55,7 +55,7 @@ const STATUS_CONFIG = {
   pending: { 
     icon: Clock, 
     label: 'Pending', 
-    className: 'bg-gray-100 text-gray-600 dark:bg-gray-500/10 dark:text-gray-400' 
+    className: 'bg-muted text-muted-foreground' 
   },
 } as const
 
@@ -83,7 +83,7 @@ export function FileCardEnhanced({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.02, duration: 0.2 }}
         onClick={onClick}
-        className="group flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 transition-all hover:border-gray-300 hover:shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700 cursor-pointer"
+        className="group flex items-center gap-3 rounded-lg border border-border bg-card p-3 transition-all hover:shadow-sm cursor-pointer"
       >
         {/* Thumbnail - Small */}
         <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded">
@@ -96,10 +96,10 @@ export function FileCardEnhanced({
         </div>
         
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+          <h3 className="truncate text-sm font-medium text-card-foreground">
             {file.title}
           </h3>
-          <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
             <span>{formatBytes(file.size_bytes)}</span>
             <span>•</span>
             <span className="hidden sm:inline">
@@ -121,12 +121,12 @@ export function FileCardEnhanced({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: index * 0.02, duration: 0.2 }}
-        className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-gray-300 hover:shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
+        className="group relative overflow-hidden rounded-lg border border-border bg-card transition-all hover:shadow-sm"
       >
         {/* Thumbnail - Square */}
         <div 
           onClick={onClick} 
-          className="relative aspect-square cursor-pointer overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900"
+          className="relative aspect-square cursor-pointer overflow-hidden bg-gradient-to-br from-muted/50 to-muted"
         >
           <ThumbnailImage
             src={file.thumbnail_url || ''}
@@ -148,16 +148,16 @@ export function FileCardEnhanced({
         
         {/* File Info */}
         <div onClick={onClick} className="cursor-pointer p-2">
-          <h3 className="truncate text-xs font-medium text-gray-900 dark:text-gray-100">
+          <h3 className="truncate text-xs font-medium text-card-foreground">
             {file.title}
           </h3>
-          <p className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+          <p className="mt-0.5 text-[10px] text-muted-foreground">
             {formatBytes(file.size_bytes)}
           </p>
         </div>
 
         {/* Actions */}
-        <div className="flex border-t border-gray-100 dark:border-gray-800">
+        <div className="flex border-t border-border">
           <ActionButton icon={Download} onClick={onDownload} label="Download" />
           <ActionButton icon={FolderInput} onClick={onMove} label="Move" />
           <ActionButton icon={Trash2} onClick={onDelete} label="Delete" danger />
@@ -172,12 +172,12 @@ export function FileCardEnhanced({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.02, duration: 0.2 }}
-      className="group overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-gray-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
+      className="group overflow-hidden rounded-lg border border-border bg-card transition-all hover:shadow-md"
     >
       {/* Thumbnail - 4:3 Aspect */}
       <div 
         onClick={onClick} 
-        className="relative aspect-[4/3] cursor-pointer overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900"
+        className="relative aspect-[4/3] cursor-pointer overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 dark:from-muted/50 dark:to-muted"
       >
         <ThumbnailImage
           src={file.thumbnail_url || ''}
@@ -201,7 +201,7 @@ export function FileCardEnhanced({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-lg"
+              className="rounded-lg bg-card px-4 py-2 text-sm font-semibold text-card-foreground shadow-lg"
               onClick={onClick}
             >
               View File
@@ -212,20 +212,20 @@ export function FileCardEnhanced({
 
       {/* File Info */}
       <div onClick={onClick} className="cursor-pointer p-3">
-        <h3 className="truncate font-medium text-gray-900 dark:text-gray-100">
+        <h3 className="truncate font-medium text-card-foreground">
           {file.title}
         </h3>
-        <p className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
+        <p className="mt-1 truncate text-xs text-muted-foreground">
           {file.filename}
         </p>
-        <div className="mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>{formatBytes(file.size_bytes)}</span>
           <span>{formatDistanceToNow(new Date(file.created_at), { addSuffix: true })}</span>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex border-t border-gray-100 dark:border-gray-800">
+      <div className="flex border-t border-border">
         <ActionButton icon={Download} onClick={onDownload} label="Download" />
         <ActionButton icon={FolderInput} onClick={onMove} label="Move" />
         <ActionButton icon={Trash2} onClick={onDelete} label="Delete" danger />
@@ -281,7 +281,7 @@ function Actions({
           e.stopPropagation()
           onDownload() 
         }}
-        className="rounded p-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+        className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         aria-label="Download"
       >
         <Download className="h-4 w-4" />
@@ -291,7 +291,7 @@ function Actions({
           e.stopPropagation()
           onMove() 
         }}
-        className="rounded p-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+        className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         aria-label="Move"
       >
         <FolderInput className="h-4 w-4" />
@@ -327,10 +327,10 @@ function ActionButton({
         e.stopPropagation()
         onClick() 
       }}
-      className={`flex flex-1 items-center justify-center gap-1.5 border-r py-2 text-xs font-medium transition-colors last:border-r-0 ${
+      className={`flex flex-1 items-center justify-center gap-1.5 border-r border-border py-2 text-xs font-medium transition-colors last:border-r-0 ${
         danger
-          ? 'text-red-600 hover:bg-red-50 dark:border-gray-800 dark:text-red-400 dark:hover:bg-red-500/10'
-          : 'text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800'
+          ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10'
+          : 'text-muted-foreground hover:bg-muted'
       }`}
       aria-label={label}
     >
