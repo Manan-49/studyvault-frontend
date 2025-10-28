@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -48,6 +48,8 @@ interface FileData {
   ocr_text?: string
 }
 
+const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
+
 export default function FileViewPage() {
   const params = useParams()
   const router = useRouter()
@@ -61,9 +63,9 @@ export default function FileViewPage() {
   // Viewer controls
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
-  const [zoom, setZoom] = useState(1) // used for images and programmatic zoom
+  const [zoom, setZoom] = useState(1)
   const [rotation, setRotation] = useState(0)
-  const [offset, setOffset] = useState({ x: 0, y: 0 }) // pan offset (for images)
+  const [offset, setOffset] = useState({ x: 0, y: 0 }) // panning
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const [showInfo, setShowInfo] = useState(false)
@@ -71,19 +73,13 @@ export default function FileViewPage() {
   const [copiedOCR, setCopiedOCR] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
 
-  // Refs for pinch/pan state (images)
-  const stageRef = useRef<HTMLDivElement | null>(null)
-  const contentRef = useRef<HTMLDivElement | null>(null)
+  // Gesture refs for pinch/pan
+  const gestureRef = useRef<HTMLDivElement | null>(null)
   const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map())
-  const initialDistanceRef = useRef(0)
-  const initialZoomRef = useRef(1)
-  const lastPanPointRef = useRef<{ x: number; y: number } | null>(null)
-
-  // Device checks
-  const isIOS = useMemo(() => {
-    if (typeof navigator === 'undefined') return false
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
-  }, [])
+  const pinchStartDistRef = useRef<number | null>(null)
+  const pinchStartZoomRef = useRef<number>(1)
+  const panPointerIdRef = useRef<number | null>(null)
+  const lastPanRef = useRef<{ x: number; y: number } | null>(null)
 
   // Fetch file data
   useEffect(() => {
@@ -108,6 +104,7 @@ export default function FileViewPage() {
   // Load file blob
   useEffect(() => {
     if (!file) return
+    let currentUrl: string | null = null
 
     const loadFileBlob = async () => {
       try {
@@ -115,8 +112,8 @@ export default function FileViewPage() {
           responseType: 'blob',
         })
         const blob = response.data
-        const url = URL.createObjectURL(blob)
-        setFileUrl(url)
+        currentUrl = URL.createObjectURL(blob)
+        setFileUrl(currentUrl)
       } catch (error: any) {
         console.error('Error loading file blob:', error)
         setError('Failed to load file preview')
@@ -126,9 +123,8 @@ export default function FileViewPage() {
     loadFileBlob()
 
     return () => {
-      if (fileUrl) URL.revokeObjectURL(fileUrl)
+      if (currentUrl) URL.revokeObjectURL(currentUrl)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file?.id])
 
   // Fullscreen handling
@@ -152,7 +148,7 @@ export default function FileViewPage() {
         e.preventDefault()
         toggleFullscreen()
       } else if (e.key === 'Escape' && isFullscreen) {
-        if ((document as any).exitFullscreen) (document as any).exitFullscreen()
+        document.exitFullscreen()
       } else if (e.key === '+' || e.key === '=') {
         handleZoomIn()
       } else if (e.key === '-') {
@@ -187,59 +183,35 @@ export default function FileViewPage() {
     }
   }, [isFullscreen])
 
+  // Reset transform when file or page changes
+  useEffect(() => {
+    setZoom(1)
+    setRotation(0)
+    setOffset({ x: 0, y: 0 })
+    setCurrentPage(1)
+  }, [file?.id])
+
+  // Keep offset reset when zoom returns to 1
+  useEffect(() => {
+    if (zoom <= 1.0001) {
+      setOffset({ x: 0, y: 0 })
+    }
+  }, [zoom])
+
   const toggleFullscreen = () => {
-    try {
-      const el = document.documentElement as any
-      if (!document.fullscreenElement) {
-        if (el.requestFullscreen) el.requestFullscreen()
-        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen()
-      } else {
-        if ((document as any).exitFullscreen) (document as any).exitFullscreen()
-        else if ((document as any).webkitExitFullscreen) (document as any).webkitExitFullscreen()
-      }
-    } catch (e) {
-      console.warn('Fullscreen not supported on this browser.')
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen()
+    } else {
+      document.exitFullscreen()
     }
   }
 
-  const clamp = (val: number, min: number, max: number) => Math.max(min, Math.min(max, val))
-
-  const applyZoomAtPoint = (nextZoom: number, clientX: number, clientY: number) => {
-    const stage = stageRef.current
-    if (!stage) {
-      setZoom(clamp(nextZoom, 0.5, 3))
-      return
-    }
-    const rect = stage.getBoundingClientRect()
-    const cx = clientX - rect.left
-    const cy = clientY - rect.top
-
-    const newZoom = clamp(nextZoom, 0.5, 3)
-    const scaleRatio = newZoom / zoom
-    const newOffsetX = cx - scaleRatio * (cx - offset.x)
-    const newOffsetY = cy - scaleRatio * (cy - offset.y)
-
-    setZoom(newZoom)
-    setOffset({ x: newOffsetX, y: newOffsetY })
-  }
-
-  const handleZoomIn = () => {
-    const stage = stageRef.current
-    const rect = stage?.getBoundingClientRect()
-    const centerX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2
-    const centerY = rect ? rect.top + rect.height / 2 : window.innerHeight / 2
-    applyZoomAtPoint(zoom + 0.25, centerX, centerY)
-  }
-
-  const handleZoomOut = () => {
-    const stage = stageRef.current
-    const rect = stage?.getBoundingClientRect()
-    const centerX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2
-    const centerY = rect ? rect.top + rect.height / 2 : window.innerHeight / 2
-    applyZoomAtPoint(zoom - 0.25, centerX, centerY)
-  }
-
+  const handleZoomIn = () => setZoom((z) => clamp(z + 0.25, 0.5, 3))
+  const handleZoomOut = () => setZoom((z) => clamp(z - 0.25, 0.5, 3))
   const handleRotate = () => setRotation((r) => (r + 90) % 360)
+  const openInNewTab = () => {
+    if (fileUrl) window.open(fileUrl, '_blank', 'noopener,noreferrer')
+  }
 
   const handleDownload = async () => {
     if (!file) return
@@ -337,88 +309,63 @@ export default function FileViewPage() {
     }
   }
 
-  // Center image content initially
-  useEffect(() => {
-    if (!fileUrl || !file) return
-    const isImage = file.mime_type.startsWith('image/')
-    if (!isImage) return
-
-    const centerImage = () => {
-      const stage = stageRef.current
-      const content = contentRef.current
-      if (!stage || !content) return
-      // Reset transforms to measure
-      setZoom(1)
-      setRotation(0)
-      setOffset({ x: 0, y: 0 })
-      requestAnimationFrame(() => {
-        const s = stage.getBoundingClientRect()
-        const c = content.getBoundingClientRect()
-        const newOffsetX = (s.width - c.width) / 2
-        const newOffsetY = (s.height - c.height) / 2
-        setOffset({ x: newOffsetX, y: newOffsetY })
-      })
-    }
-
-    centerImage()
-  }, [fileUrl, file])
-
-  // Pinch/pan handlers (images only)
-  const onPointerDown = (e: React.PointerEvent) => {
-    if (!file?.mime_type.startsWith('image/')) return
-    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
-    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-    if (pointersRef.current.size === 1) {
-      lastPanPointRef.current = { x: e.clientX, y: e.clientY }
-    } else if (pointersRef.current.size === 2) {
-      const [p1, p2] = Array.from(pointersRef.current.values())
-      initialDistanceRef.current = Math.hypot(p1.x - p2.x, p1.y - p2.y)
-      initialZoomRef.current = zoom
-    }
-  }
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!file?.mime_type.startsWith('image/')) return
-    if (!pointersRef.current.has(e.pointerId)) return
-
+  // Pinch and Pan handlers
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = e.currentTarget
+    el.setPointerCapture(e.pointerId)
     pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
 
     if (pointersRef.current.size === 2) {
-      const [p1, p2] = Array.from(pointersRef.current.values())
-      const currentDistance = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1
-      const stage = stageRef.current
-      const rect = stage?.getBoundingClientRect()
-      const centerX = rect ? (p1.x + p2.x) / 2 : window.innerWidth / 2
-      const centerY = rect ? (p1.y + p2.y) / 2 : window.innerHeight / 2
-      const nextZoom = initialZoomRef.current * (currentDistance / (initialDistanceRef.current || 1))
-      applyZoomAtPoint(nextZoom, centerX, centerY)
-    } else if (pointersRef.current.size === 1 && lastPanPointRef.current) {
-      const pt = pointersRef.current.get(e.pointerId)!
-      const dx = pt.x - lastPanPointRef.current.x
-      const dy = pt.y - lastPanPointRef.current.y
-      lastPanPointRef.current = { x: pt.x, y: pt.y }
+      const pts = Array.from(pointersRef.current.values())
+      pinchStartDistRef.current = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
+      pinchStartZoomRef.current = zoom
+    } else if (pointersRef.current.size === 1 && zoom > 1) {
+      panPointerIdRef.current = e.pointerId
+      lastPanRef.current = { x: e.clientX, y: e.clientY }
+    }
+  }
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!pointersRef.current.has(e.pointerId)) return
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+    // Pinch
+    if (pointersRef.current.size >= 2 && pinchStartDistRef.current) {
+      const pts = Array.from(pointersRef.current.values())
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
+      const scaleFactor = dist / pinchStartDistRef.current
+      setZoom(clamp(pinchStartZoomRef.current * scaleFactor, 0.5, 3))
+      e.preventDefault()
+      return
+    }
+
+    // Pan
+    if (panPointerIdRef.current === e.pointerId && zoom > 1 && lastPanRef.current) {
+      const dx = e.clientX - lastPanRef.current.x
+      const dy = e.clientY - lastPanRef.current.y
       setOffset((o) => ({ x: o.x + dx, y: o.y + dy }))
+      lastPanRef.current = { x: e.clientX, y: e.clientY }
+      e.preventDefault()
     }
   }
 
-  const onPointerUp = (e: React.PointerEvent) => {
-    if (!file?.mime_type.startsWith('image/')) return
+  const onPointerUpOrCancel = (e: React.PointerEvent<HTMLDivElement>) => {
     pointersRef.current.delete(e.pointerId)
-    if (pointersRef.current.size < 2) {
-      initialDistanceRef.current = 0
+    if (panPointerIdRef.current === e.pointerId) {
+      panPointerIdRef.current = null
+      lastPanRef.current = null
     }
-    if (pointersRef.current.size === 0) {
-      lastPanPointRef.current = null
+    if (pointersRef.current.size < 2) {
+      pinchStartDistRef.current = null
+      pinchStartZoomRef.current = zoom
     }
   }
 
-  const onWheel = (e: React.WheelEvent) => {
-    if (!file?.mime_type.startsWith('image/')) return
-    // zoom on ctrl+wheel or trackpads
+  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    // pinch-to-zoom on trackpads sends ctrl + wheel
     if (e.ctrlKey) {
       e.preventDefault()
-      const nextZoom = zoom + (e.deltaY < 0 ? 0.1 : -0.1)
-      applyZoomAtPoint(nextZoom, e.clientX, e.clientY)
+      setZoom((z) => clamp(z * (e.deltaY < 0 ? 1.1 : 0.9), 0.5, 3))
     }
   }
 
@@ -427,6 +374,7 @@ export default function FileViewPage() {
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
         <div className="text-center">
           <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
+          <p className="mt-4 text-sm text-muted-foreground">Loading file...</p>
         </div>
       </div>
     )
@@ -455,10 +403,6 @@ export default function FileViewPage() {
 
   const isPDF = file.mime_type === 'application/pdf'
   const isImage = file.mime_type.startsWith('image/')
-
-  // iOS cannot render blob PDFs in an <iframe>/<object> reliably
-  const pdfInFrameSupported = !(isIOS && isPDF)
-
   const ocrStatus = getOCRStatus()
   const OCRIcon = ocrStatus.icon
 
@@ -538,172 +482,169 @@ export default function FileViewPage() {
       </AnimatePresence>
 
       {/* Viewer */}
-      <div className="relative flex-1 min-h-0 overflow-hidden rounded-xl bg-muted">
+      <div className="relative flex-1 overflow-hidden rounded-xl bg-muted">
         {/* File Content */}
-        <div
-          ref={stageRef}
-          className="relative h-full w-full overflow-hidden"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          onWheel={onWheel}
-          style={{
-            touchAction: isImage ? 'none' : 'auto', // allow native pinch zoom for PDFs
-            cursor: isImage ? 'grab' : 'auto',
-          }}
-        >
+        <div className="flex h-full items-center justify-center overflow-auto p-4">
           {!fileUrl ? (
-            <div className="flex h-full w-full items-center justify-center p-4">
-              <div className="text-center">
-                <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
-                <p className="mt-4 text-sm text-muted-foreground">Loading preview...</p>
-              </div>
-            </div>
-          ) : isPDF ? (
-            pdfInFrameSupported ? (
-              // Use <object> to get better pinch support in many mobile browsers
-              <object
-                key={currentPage}
-                data={`${fileUrl}#page=${currentPage}`}
-                type="application/pdf"
-                className="h-full w-full"
-              >
-                <div className="flex h-full w-full items-center justify-center p-4">
-                  <div className="max-w-md rounded-xl border-2 border-border bg-card p-6 text-center">
-                    <FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-                    <p className="mb-4 text-muted-foreground">Preview not available. Open to view.</p>
-                    <button
-                      onClick={() => window.open(fileUrl, '_blank')}
-                      className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
-                    >
-                      Open PDF
-                    </button>
-                  </div>
-                </div>
-              </object>
-            ) : (
-              // iOS fallback: open in new tab native viewer for pinch-to-zoom
-              <div className="flex h-full w-full items-center justify-center p-4">
-                <div className="max-w-md rounded-xl border-2 border-border bg-card p-6 text-center">
-                  <FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-                  <p className="mb-4 text-muted-foreground">
-                    Your browser can’t preview this PDF here. Open it to use pinch-to-zoom.
-                  </p>
-                  <button
-                    onClick={() => window.open(fileUrl, '_blank')}
-                    className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
-                  >
-                    Open PDF
-                  </button>
-                </div>
-              </div>
-            )
-          ) : isImage ? (
-            <div
-              ref={contentRef}
-              className="absolute left-0 top-0 will-change-transform"
-              style={{
-                transform: `translate3d(${offset.x}px, ${offset.y}px, 0) scale(${zoom}) rotate(${rotation}deg)`,
-                transformOrigin: '0 0',
-              }}
-            >
-              <img
-                src={fileUrl}
-                alt={file.title}
-                className="block max-h-[85vh] w-auto max-w-[90vw] select-none rounded-lg shadow-2xl"
-                draggable={false}
-              />
+            <div className="text-center">
+              <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
+              <p className="mt-4 text-sm text-muted-foreground">Loading preview...</p>
             </div>
           ) : (
-            <div className="flex h-full w-full items-center justify-center p-4">
-              <div className="max-w-md rounded-xl border-2 border-border bg-card p-8 text-center">
-                <FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-                <p className="mb-4 text-muted-foreground">Preview not available for this file type</p>
-                <button
-                  onClick={handleDownload}
-                  className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
-                >
-                  Download to View
-                </button>
-              </div>
-            </div>
+            <motion.div
+              ref={gestureRef}
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUpOrCancel}
+              onPointerCancel={onPointerUpOrCancel}
+              onWheel={onWheel}
+              className="relative inline-block"
+              animate={{
+                scale: zoom,
+                rotate: rotation,
+                x: offset.x,
+                y: offset.y,
+              }}
+              transition={{ type: 'spring', stiffness: 200, damping: 30 }}
+              style={{
+                touchAction: 'none', // enables custom pinch/pan
+                transformOrigin: 'center center',
+                cursor: zoom > 1 ? 'grab' : 'default',
+              }}
+            >
+              {isPDF ? (
+                <>
+                  {/* Prefer object/embed for better mobile support; fallback link */}
+                  <object
+                    data={`${fileUrl}#page=${currentPage}`}
+                    type="application/pdf"
+                    className="rounded-lg shadow-2xl"
+                    style={{
+                      width: '100%',
+                      maxWidth: '900px',
+                      height: isFullscreen ? '85vh' : '70vh',
+                      border: 'none',
+                    }}
+                  >
+                    <div className="max-w-md rounded-xl border-2 border-border bg-card p-6 text-center">
+                      <p className="mb-4 text-sm text-muted-foreground">
+                        PDF preview is not supported on this device.
+                      </p>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                        <button
+                          onClick={openInNewTab}
+                          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                          Open in new tab
+                        </button>
+                        <button
+                          onClick={handleDownload}
+                          className="rounded-lg border-2 border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-accent"
+                        >
+                          Download
+                        </button>
+                      </div>
+                    </div>
+                  </object>
+                </>
+              ) : isImage ? (
+                <img
+                  src={fileUrl}
+                  alt={file.title}
+                  className="rounded-lg shadow-2xl"
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: isFullscreen ? '85vh' : '70vh',
+                    objectFit: 'contain',
+                    display: 'block',
+                  }}
+                  draggable={false}
+                />
+              ) : (
+                <div className="max-w-md rounded-xl border-2 border-border bg-card p-8 text-center">
+                  <FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+                  <p className="mb-4 text-muted-foreground">Preview not available for this file type</p>
+                  <button
+                    onClick={handleDownload}
+                    className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+                  >
+                    Download to View
+                  </button>
+                </div>
+              )}
+            </motion.div>
           )}
         </div>
 
-        {/* Floating Controls */}
+        {/* Floating Controls - mobile-safe placement */}
         <AnimatePresence>
           {(showControls || !isFullscreen) && (isPDF || isImage) && (
-            <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
-              <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 50, opacity: 0 }}
-                className="pointer-events-auto flex max-w-[min(680px,calc(100vw-1rem))] flex-wrap items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card/95 p-3 shadow-2xl backdrop-blur-sm"
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              className="fixed z-40 left-4 right-4 bottom-[calc(env(safe-area-inset-bottom)+16px)] sm:left-1/2 sm:right-auto sm:bottom-6 sm:-translate-x-1/2 flex flex-wrap items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card/95 p-3 shadow-2xl backdrop-blur-sm"
+            >
+              {/* Zoom Controls */}
+              <div className="flex items-center gap-1 rounded-xl bg-muted px-2">
+                <button
+                  onClick={handleZoomOut}
+                  disabled={zoom <= 0.5}
+                  className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                  title="Zoom Out"
+                >
+                  <ZoomOut className="h-5 w-5" />
+                </button>
+                <span className="min-w-[3.5rem] text-center text-sm font-bold">
+                  {Math.round(zoom * 100)}%
+                </span>
+                <button
+                  onClick={handleZoomIn}
+                  disabled={zoom >= 3}
+                  className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                  title="Zoom In"
+                >
+                  <ZoomIn className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Rotate */}
+              <button
+                onClick={handleRotate}
+                className="rounded-xl bg-muted p-2 hover:bg-accent"
+                title="Rotate"
               >
-                {/* Zoom Controls */}
-                <div className="flex items-center gap-1 rounded-xl bg-muted px-2">
-                  <button
-                    onClick={handleZoomOut}
-                    disabled={isPDF ? false : zoom <= 0.5}
-                    className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
-                    title="Zoom Out"
-                  >
-                    <ZoomOut className="h-5 w-5" />
-                  </button>
-                  <span className="min-w-[3.5rem] text-center text-sm font-bold">
-                    {isPDF ? 'PDF' : `${Math.round(zoom * 100)}%`}
-                  </span>
-                  <button
-                    onClick={handleZoomIn}
-                    disabled={isPDF ? false : zoom >= 3}
-                    className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
-                    title="Zoom In"
-                  >
-                    <ZoomIn className="h-5 w-5" />
-                  </button>
-                </div>
+                <RotateCw className="h-5 w-5" />
+              </button>
 
-                {/* Rotate (works for images and will also rotate the image; PDFs rotation is not applied here) */}
-                {isImage && (
-                  <button
-                    onClick={handleRotate}
-                    className="rounded-xl bg-muted p-2 hover:bg-accent"
-                    title="Rotate"
-                  >
-                    <RotateCw className="h-5 w-5" />
-                  </button>
-                )}
-
-                {/* PDF Page Navigation */}
-                {isPDF && totalPages > 1 && (
-                  <>
-                    <div className="h-8 w-px bg-border" />
-                    <div className="flex items-center gap-1 rounded-xl bg-muted px-2">
-                      <button
-                        onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                        disabled={currentPage === 1}
-                        className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
-                        title="Previous"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                      <span className="min-w-[4rem] text-center text-sm font-bold">
-                        {currentPage} / {totalPages}
-                      </span>
-                      <button
-                        onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
-                        title="Next"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </motion.div>
-            </div>
+              {/* PDF Page Navigation */}
+              {isPDF && totalPages > 1 && (
+                <>
+                  <div className="hidden h-8 w-px bg-border sm:block" />
+                  <div className="flex items-center gap-1 rounded-xl bg-muted px-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                      title="Previous"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <span className="min-w-[4rem] text-center text-sm font-bold">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                      title="Next"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
@@ -883,8 +824,8 @@ export default function FileViewPage() {
                 )}
               </div>
 
-              {/* Keyboard Shortcuts - Desktop Only */}
-              <div className="mt-8 rounded-xl border-2 border-border bg-muted p-4 hidden sm:block">
+              {/* Keyboard Shortcuts */}
+              <div className="mt-8 rounded-xl border-2 border-border bg-muted p-4">
                 <h3 className="mb-3 text-sm font-bold">Keyboard Shortcuts</h3>
                 <div className="space-y-2 text-xs text-muted-foreground">
                   <div className="flex justify-between">
@@ -907,25 +848,6 @@ export default function FileViewPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Mobile Gestures */}
-              <div className="mt-8 rounded-xl border-2 border-border bg-muted p-4 sm:hidden">
-                <h3 className="mb-3 text-sm font-bold">Touch Gestures</h3>
-                <div className="space-y-2 text-xs text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>Zoom</span>
-                    <span className="font-semibold">Pinch</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Pan (when zoomed)</span>
-                    <span className="font-semibold">Drag</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Rotate</span>
-                    <span className="font-semibold">Tap button</span>
-                  </div>
-                </div>
-              </div>
             </motion.div>
           </>
         )}
@@ -938,10 +860,10 @@ export default function FileViewPage() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-green-600 px-4 py-3 font-semibold text-white shadow-2xl"
+            className="fixed bottom-[calc(env(safe-area-inset-bottom)+24px)] right-6 z-50 flex items-center gap-2 rounded-xl bg-green-600 px-4 py-3 font-semibold text-white shadow-2xl"
           >
             <Check className="h-5 w-5" />
-            Link copied!
+            Link copied to clipboard!
           </motion.div>
         )}
       </AnimatePresence>
