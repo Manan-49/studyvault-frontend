@@ -1,6 +1,8 @@
+// src/app/(main)/explore/[fileId]/page.tsx
+
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -68,6 +70,12 @@ export default function FileViewPage() {
   const [copiedOCR, setCopiedOCR] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
 
+  // Touch gesture handling
+  const viewerRef = useRef<HTMLDivElement>(null)
+  const touchStartRef = useRef<{ x: number; y: number; distance: number }>({ x: 0, y: 0, distance: 0 })
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 })
+  const [isPanning, setIsPanning] = useState(false)
+
   // Fetch file data
   useEffect(() => {
     const fetchFile = async () => {
@@ -112,6 +120,77 @@ export default function FileViewPage() {
       if (fileUrl) URL.revokeObjectURL(fileUrl)
     }
   }, [file?.id])
+
+  // Touch gestures for pinch zoom and pan
+  useEffect(() => {
+    const viewer = viewerRef.current
+    if (!viewer) return
+
+    const getTouchDistance = (touches: TouchList) => {
+      const dx = touches[0].clientX - touches[1].clientX
+      const dy = touches[0].clientY - touches[1].clientY
+      return Math.sqrt(dx * dx + dy * dy)
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault()
+        touchStartRef.current.distance = getTouchDistance(e.touches)
+      } else if (e.touches.length === 1 && zoom > 1) {
+        touchStartRef.current.x = e.touches[0].clientX - panOffset.x
+        touchStartRef.current.y = e.touches[0].clientY - panOffset.y
+        setIsPanning(true)
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault()
+        const currentDistance = getTouchDistance(e.touches)
+        const scale = currentDistance / touchStartRef.current.distance
+        const newZoom = Math.min(Math.max(zoom * scale, 0.5), 3)
+        setZoom(newZoom)
+        touchStartRef.current.distance = currentDistance
+      } else if (e.touches.length === 1 && isPanning && zoom > 1) {
+        e.preventDefault()
+        const newX = e.touches[0].clientX - touchStartRef.current.x
+        const newY = e.touches[0].clientY - touchStartRef.current.y
+        setPanOffset({ x: newX, y: newY })
+      }
+    }
+
+    const handleTouchEnd = () => {
+      setIsPanning(false)
+    }
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        const delta = e.deltaY > 0 ? 0.9 : 1.1
+        const newZoom = Math.min(Math.max(zoom * delta, 0.5), 3)
+        setZoom(newZoom)
+      }
+    }
+
+    viewer.addEventListener('touchstart', handleTouchStart, { passive: false })
+    viewer.addEventListener('touchmove', handleTouchMove, { passive: false })
+    viewer.addEventListener('touchend', handleTouchEnd)
+    viewer.addEventListener('wheel', handleWheel, { passive: false })
+
+    return () => {
+      viewer.removeEventListener('touchstart', handleTouchStart)
+      viewer.removeEventListener('touchmove', handleTouchMove)
+      viewer.removeEventListener('touchend', handleTouchEnd)
+      viewer.removeEventListener('wheel', handleWheel)
+    }
+  }, [zoom, panOffset, isPanning])
+
+  // Reset pan when zoom is reset
+  useEffect(() => {
+    if (zoom <= 1) {
+      setPanOffset({ x: 0, y: 0 })
+    }
+  }, [zoom])
 
   // Fullscreen handling
   useEffect(() => {
@@ -180,6 +259,11 @@ export default function FileViewPage() {
   const handleZoomIn = () => setZoom((z) => Math.min(z + 0.25, 3))
   const handleZoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5))
   const handleRotate = () => setRotation((r) => (r + 90) % 360)
+  const handleResetView = () => {
+    setZoom(1)
+    setRotation(0)
+    setPanOffset({ x: 0, y: 0 })
+  }
 
   const handleDownload = async () => {
     if (!file) return
@@ -323,7 +407,7 @@ export default function FileViewPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={`mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
+            className={`mb-4 flex flex-col gap-3 px-4 sm:px-0 sm:flex-row sm:items-center sm:justify-between ${
               isFullscreen ? 'fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/95 p-4 backdrop-blur-sm' : ''
             }`}
           >
@@ -390,46 +474,55 @@ export default function FileViewPage() {
       </AnimatePresence>
 
       {/* Viewer */}
-      <div className="relative flex-1 overflow-hidden rounded-xl bg-muted">
+      <div 
+        ref={viewerRef}
+        className="relative flex-1 overflow-hidden rounded-xl bg-muted mx-4 sm:mx-0 touch-none"
+        style={{ touchAction: 'none' }}
+      >
         {/* File Content */}
-        <div className="flex h-full items-center justify-center overflow-auto p-4">
+        <div className="flex h-full items-center justify-center overflow-hidden p-4">
           {!fileUrl ? (
             <div className="text-center">
               <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
               <p className="mt-4 text-sm text-muted-foreground">Loading preview...</p>
             </div>
           ) : isPDF ? (
-            <motion.iframe
-              key={currentPage}
-              src={`${fileUrl}#page=${currentPage}`}
-              className="rounded-lg shadow-2xl"
-              animate={{
-                scale: zoom,
-                rotate: rotation,
-              }}
-              transition={{ duration: 0.2 }}
+            <div
+              className="relative"
               style={{
+                transform: `scale(${zoom}) rotate(${rotation}deg) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
+                transformOrigin: 'center center',
+                transition: isPanning ? 'none' : 'transform 0.2s',
                 width: '100%',
                 maxWidth: '900px',
                 height: isFullscreen ? '90vh' : '75vh',
-                border: 'none',
-                transformOrigin: 'center center',
               }}
-            />
+            >
+              <iframe
+                src={`${fileUrl}#page=${currentPage}&view=FitH`}
+                className="rounded-lg shadow-2xl pointer-events-auto"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                }}
+              />
+              <div className="absolute inset-0 pointer-events-none" />
+            </div>
           ) : isImage ? (
             <motion.img
               src={fileUrl}
               alt={file.title}
-              className="rounded-lg shadow-2xl"
-              animate={{
-                scale: zoom,
-                rotate: rotation,
-              }}
-              transition={{ duration: 0.2 }}
+              className="rounded-lg shadow-2xl select-none"
+              draggable={false}
               style={{
+                transform: `scale(${zoom}) rotate(${rotation}deg) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
+                transformOrigin: 'center center',
+                transition: isPanning ? 'none' : 'transform 0.2s',
                 maxWidth: '100%',
                 maxHeight: isFullscreen ? '90vh' : '75vh',
                 objectFit: 'contain',
+                touchAction: 'none',
               }}
             />
           ) : (
@@ -446,6 +539,13 @@ export default function FileViewPage() {
           )}
         </div>
 
+        {/* Mobile Hint */}
+        {(isPDF || isImage) && !isFullscreen && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 text-xs text-white sm:hidden">
+            Pinch to zoom • Tap controls below
+          </div>
+        )}
+
         {/* Floating Controls */}
         <AnimatePresence>
           {(showControls || !isFullscreen) && (isPDF || isImage) && (
@@ -453,28 +553,29 @@ export default function FileViewPage() {
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
-              className="fixed bottom-6 left-1/2 z-20 flex -translate-x-1/2 flex-wrap items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card/95 p-3 shadow-2xl backdrop-blur-sm"
+              className="fixed bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-2xl border-2 border-border bg-card/95 p-2 shadow-2xl backdrop-blur-sm max-w-[calc(100vw-2rem)] overflow-x-auto"
+              style={{ touchAction: 'auto' }}
             >
               {/* Zoom Controls */}
-              <div className="flex items-center gap-1 rounded-xl bg-muted px-2">
+              <div className="flex items-center rounded-xl bg-muted">
                 <button
                   onClick={handleZoomOut}
                   disabled={zoom <= 0.5}
-                  className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                  className="rounded-l-lg p-2 hover:bg-accent disabled:opacity-50"
                   title="Zoom Out"
                 >
-                  <ZoomOut className="h-5 w-5" />
+                  <ZoomOut className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
-                <span className="min-w-[3.5rem] text-center text-sm font-bold">
+                <span className="min-w-[3rem] text-center text-xs sm:text-sm font-bold px-1">
                   {Math.round(zoom * 100)}%
                 </span>
                 <button
                   onClick={handleZoomIn}
                   disabled={zoom >= 3}
-                  className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                  className="rounded-r-lg p-2 hover:bg-accent disabled:opacity-50"
                   title="Zoom In"
                 >
-                  <ZoomIn className="h-5 w-5" />
+                  <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               </div>
 
@@ -484,32 +585,42 @@ export default function FileViewPage() {
                 className="rounded-xl bg-muted p-2 hover:bg-accent"
                 title="Rotate"
               >
-                <RotateCw className="h-5 w-5" />
+                <RotateCw className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
+
+              {/* Reset (mobile only) */}
+              {(zoom !== 1 || rotation !== 0) && (
+                <button
+                  onClick={handleResetView}
+                  className="rounded-xl bg-muted px-3 py-2 text-xs font-semibold hover:bg-accent sm:hidden"
+                >
+                  Reset
+                </button>
+              )}
 
               {/* PDF Page Navigation */}
               {isPDF && totalPages > 1 && (
                 <>
-                  <div className="h-8 w-px bg-border" />
-                  <div className="flex items-center gap-1 rounded-xl bg-muted px-2">
+                  <div className="h-6 w-px bg-border" />
+                  <div className="flex items-center rounded-xl bg-muted">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                       disabled={currentPage === 1}
-                      className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                      className="rounded-l-lg p-2 hover:bg-accent disabled:opacity-50"
                       title="Previous"
                     >
-                      <ChevronLeft className="h-5 w-5" />
+                      <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                     </button>
-                    <span className="min-w-[4rem] text-center text-sm font-bold">
-                      {currentPage} / {totalPages}
+                    <span className="min-w-[3.5rem] text-center text-xs sm:text-sm font-bold px-1">
+                      {currentPage}/{totalPages}
                     </span>
                     <button
                       onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                       disabled={currentPage === totalPages}
-                      className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                      className="rounded-r-lg p-2 hover:bg-accent disabled:opacity-50"
                       title="Next"
                     >
-                      <ChevronRight className="h-5 w-5" />
+                      <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                     </button>
                   </div>
                 </>
@@ -524,7 +635,7 @@ export default function FileViewPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 overflow-hidden rounded-xl border-2 border-border bg-card"
+          className="mt-4 mx-4 sm:mx-0 overflow-hidden rounded-xl border-2 border-border bg-card"
         >
           <button
             onClick={() => setShowOCR(!showOCR)}
@@ -694,8 +805,8 @@ export default function FileViewPage() {
                 )}
               </div>
 
-              {/* Keyboard Shortcuts */}
-              <div className="mt-8 rounded-xl border-2 border-border bg-muted p-4">
+              {/* Keyboard Shortcuts - Desktop Only */}
+              <div className="mt-8 rounded-xl border-2 border-border bg-muted p-4 hidden sm:block">
                 <h3 className="mb-3 text-sm font-bold">Keyboard Shortcuts</h3>
                 <div className="space-y-2 text-xs text-muted-foreground">
                   <div className="flex justify-between">
@@ -718,6 +829,25 @@ export default function FileViewPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Mobile Gestures */}
+              <div className="mt-8 rounded-xl border-2 border-border bg-muted p-4 sm:hidden">
+                <h3 className="mb-3 text-sm font-bold">Touch Gestures</h3>
+                <div className="space-y-2 text-xs text-muted-foreground">
+                  <div className="flex justify-between">
+                    <span>Zoom</span>
+                    <span className="font-semibold">Pinch</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Pan (when zoomed)</span>
+                    <span className="font-semibold">Drag</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Rotate</span>
+                    <span className="font-semibold">Tap button</span>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </>
         )}
@@ -733,7 +863,7 @@ export default function FileViewPage() {
             className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-green-600 px-4 py-3 font-semibold text-white shadow-2xl"
           >
             <Check className="h-5 w-5" />
-            Link copied to clipboard!
+            Link copied!
           </motion.div>
         )}
       </AnimatePresence>
