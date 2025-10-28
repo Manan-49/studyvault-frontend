@@ -51,9 +51,9 @@ export default function ProfileInfoCard({
   return (
     <div className="h-full bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-all">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Profile Information</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Update your personal details</p>
+      <div className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 px-6 py-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground">Profile Information</h2>
+        <p className="text-sm text-muted-foreground mt-1">Update your personal details</p>
       </div>
 
       {/* Content */}
@@ -103,7 +103,7 @@ export default function ProfileInfoCard({
               </CustomButton>
             </motion.div>
           ) : (
-            <div className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2 pt-2">
+            <div className="text-sm text-muted-foreground flex items-center gap-2 pt-2">
               <Check className="h-4 w-4 text-green-500" />
               Profile is up to date
             </div>

@@ -62,12 +62,12 @@ export default function SecurityCard({ onPasswordChange }: SecurityCardProps) {
   return (
     <div className="h-full bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-all">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+      <div className="bg-gradient-to-r from-purple-500/5 to-pink-500/5 px-6 py-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Security</h2>
+          <h2 className="text-lg font-semibold text-foreground">Security</h2>
         </div>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Change your password</p>
+        <p className="text-sm text-muted-foreground mt-1">Change your password</p>
       </div>
 
       {/* Content */}

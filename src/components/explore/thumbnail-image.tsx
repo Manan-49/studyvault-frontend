@@ -1,8 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import Image from 'next/image'
-import { FileText, Image as ImageIcon, File, Loader2 } from 'lucide-react'
+import { FileText, Image as ImageIcon, File, FileCode, FileSpreadsheet, FileVideo } from 'lucide-react'
 
 interface ThumbnailImageProps {
   src: string
@@ -11,60 +9,64 @@ interface ThumbnailImageProps {
   className?: string
 }
 
-export function ThumbnailImage({ src, alt, mimeType, className = '' }: ThumbnailImageProps) {
-  const [error, setError] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [retryCount, setRetryCount] = useState(0)
-
-  const getFallbackIcon = () => {
-    if (mimeType?.startsWith('image/')) {
-      return <ImageIcon className="h-16 w-16 text-blue-400" />
+export function ThumbnailImage({ mimeType, className = '' }: ThumbnailImageProps) {
+  const getFileIcon = () => {
+    if (!mimeType) {
+      return { icon: File, color: 'text-gray-400', bg: 'bg-gray-100 dark:bg-gray-800' }
     }
+
+    // Images
+    if (mimeType.startsWith('image/')) {
+      return { icon: ImageIcon, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/30' }
+    }
+
+    // PDFs
     if (mimeType === 'application/pdf') {
-      return <FileText className="h-16 w-16 text-red-400" />
+      return { icon: FileText, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-950/30' }
     }
-    return <File className="h-16 w-16 text-muted-foreground" />
+
+    // Documents
+    if (
+      mimeType.includes('word') ||
+      mimeType.includes('document') ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ) {
+      return { icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/30' }
+    }
+
+    // Spreadsheets
+    if (
+      mimeType.includes('sheet') ||
+      mimeType.includes('excel') ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ) {
+      return { icon: FileSpreadsheet, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950/30' }
+    }
+
+    // Code files
+    if (
+      mimeType.includes('json') ||
+      mimeType.includes('javascript') ||
+      mimeType.includes('html') ||
+      mimeType.includes('css')
+    ) {
+      return { icon: FileCode, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950/30' }
+    }
+
+    // Videos
+    if (mimeType.startsWith('video/')) {
+      return { icon: FileVideo, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950/30' }
+    }
+
+    // Default
+    return { icon: File, color: 'text-gray-500', bg: 'bg-gray-50 dark:bg-gray-950/30' }
   }
 
-  // Auto-retry once after 2 seconds
-  const handleError = () => {
-    if (retryCount < 1) {
-      setTimeout(() => {
-        setRetryCount(retryCount + 1)
-        setLoading(true)
-        setError(false)
-      }, 2000)
-    } else {
-      setError(true)
-      setLoading(false)
-    }
-  }
-
-  if (error || !src) {
-    return (
-      <div className={`flex items-center justify-center bg-gradient-to-br from-muted to-muted/80 ${className}`}>
-        {getFallbackIcon()}
-      </div>
-    )
-  }
+  const { icon: Icon, color, bg } = getFileIcon()
 
   return (
-    <div className={`relative ${className}`}>
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        </div>
-      )}
-      <Image
-        key={retryCount} // Force re-render on retry
-        src={src}
-        alt={alt}
-        fill
-        className="object-cover"
-        onLoad={() => setLoading(false)}
-        onError={handleError}
-        unoptimized // For external URLs
-      />
+    <div className={`flex items-center justify-center ${bg} ${className}`}>
+      <Icon className={`h-12 w-12 ${color}`} />
     </div>
   )
 }

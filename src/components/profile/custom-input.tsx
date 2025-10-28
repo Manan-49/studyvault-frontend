@@ -30,14 +30,14 @@ export default function CustomInput({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+      <label className="block text-sm font-medium text-foreground">
         {label}
       </label>
       
       <div className="relative">
         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
           <Icon className={`h-5 w-5 transition-colors ${
-            focused ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
+            focused ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'
           }`} />
         </div>
 
@@ -54,9 +54,9 @@ export default function CustomInput({
               ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-400' 
               : error 
                 ? 'border-red-300 bg-red-50/50 dark:bg-red-900/10 dark:border-red-400'
-                : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 hover:border-slate-300 dark:hover:border-slate-600'
+                : 'border-border bg-background/50 hover:border-border'
             }
-            text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500
+            text-foreground placeholder:text-muted-foreground
           `}
         />
 
@@ -64,7 +64,7 @@ export default function CustomInput({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
           >
             {showPassword ? (
               <EyeOff className="h-5 w-5" />

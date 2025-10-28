@@ -31,14 +31,14 @@ export function FileBreadcrumb({ fileName, folderPath, folderId }: FileBreadcrum
 
       {pathSegments.map((segment, index) => (
         <div key={index} className="flex items-center gap-2">
-          <ChevronRight className="h-4 w-4 text-gray-400" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
           <span className="whitespace-nowrap text-muted-foreground">{segment}</span>
         </div>
       ))}
 
       {folderId && (
         <>
-          <ChevronRight className="h-4 w-4 text-gray-400" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
           <Link href={`/explore?folder_id=${folderId}`}>
             <span className="whitespace-nowrap text-blue-600 hover:underline dark:text-blue-400">
               Current Folder
@@ -47,7 +47,7 @@ export function FileBreadcrumb({ fileName, folderPath, folderId }: FileBreadcrum
         </>
       )}
 
-      <ChevronRight className="h-4 w-4 text-gray-400" />
+      <ChevronRight className="h-4 w-4 text-muted-foreground" />
       <div className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
         <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
         <span className="truncate font-semibold text-blue-700 dark:text-blue-300">{fileName}</span>

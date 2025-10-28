@@ -51,7 +51,7 @@ export function RecentFileCard({ file, index }: RecentFileCardProps) {
       <Link href={`/explore/${file.id}`} className="block w-full">
         <div className="group relative w-full overflow-hidden rounded-lg border border-border bg-card p-3 transition-all hover:border-primary hover:shadow-md sm:rounded-xl sm:p-4">
           {/* Hover gradient effect */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 transition-opacity group-hover:opacity-100 dark:from-blue-950/20 dark:to-indigo-950/20" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
 
           <div className="relative flex w-full items-center gap-3 sm:gap-4">
             {/* Icon */}

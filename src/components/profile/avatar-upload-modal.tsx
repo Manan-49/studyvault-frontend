@@ -214,8 +214,8 @@ export default function AvatarUploadModal({
                         className={`
                           relative border-2 border-dashed rounded-2xl p-16 transition-all cursor-pointer
                           ${isDragging 
-                            ? 'border-blue-500 bg-blue-50 scale-105' 
-                            : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
+                            ? 'border-primary bg-primary/10 scale-105' 
+                            : 'border-border hover:border-primary hover:bg-muted'
                           }
                         `}
                       >
@@ -230,7 +230,7 @@ export default function AvatarUploadModal({
                             <Upload className="h-10 w-10 text-white" />
                           </div>
                           <div className="text-center">
-                            <p className="text-lg font-semibold text-slate-700">
+                            <p className="text-lg font-semibold text-foreground">
                               {isDragging ? 'Drop image here' : 'Click to upload or drag and drop'}
                             </p>
                             <p className="text-sm text-slate-500 mt-2">
@@ -264,13 +264,13 @@ export default function AvatarUploadModal({
                         {/* Controls */}
                         <div className="space-y-5">
                           {/* Zoom Control */}
-                          <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
+                          <div className="bg-muted rounded-xl p-5 border border-border">
                             <div className="flex items-center justify-between mb-3">
-                              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                              <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                                 <ZoomIn className="h-4 w-4" />
                                 Zoom
                               </label>
-                              <span className="text-sm font-medium text-slate-900">
+                              <span className="text-sm font-medium text-foreground">
                                 {Math.round(zoom * 100)}%
                               </span>
                             </div>
@@ -280,7 +280,7 @@ export default function AvatarUploadModal({
                                 className="p-2.5 rounded-lg bg-card border border-border hover:bg-accent hover:border-border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={zoom <= 1}
                               >
-                                <ZoomOut className="h-4 w-4 text-slate-700" />
+                                <ZoomOut className="h-4 w-4 text-foreground" />
                               </button>
                               <input
                                 type="range"
@@ -299,7 +299,7 @@ export default function AvatarUploadModal({
                                 className="p-2.5 rounded-lg bg-card border border-border hover:bg-accent hover:border-border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={zoom >= 3}
                               >
-                                <ZoomIn className="h-4 w-4 text-slate-700" />
+                                <ZoomIn className="h-4 w-4 text-foreground" />
                               </button>
                             </div>
                           </div>

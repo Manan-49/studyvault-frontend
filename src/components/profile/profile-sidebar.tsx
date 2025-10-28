@@ -71,12 +71,12 @@ export default function ProfileSidebar({
 
           {/* User Info */}
           <div className="space-y-1 text-center">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">{user?.name}</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">{user?.email}</p>
+            <h2 className="text-xl font-bold text-foreground">{user?.name}</h2>
+            <p className="text-sm text-muted-foreground">{user?.email}</p>
           </div>
 
           {/* Divider */}
-          <div className="my-6 border-t border-slate-200 dark:border-slate-700" />
+          <div className="my-6 border-t border-border" />
 
           {/* Details */}
           <div className="space-y-4">
@@ -85,8 +85,8 @@ export default function ProfileSidebar({
                 <Mail className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-slate-500 dark:text-slate-400">Email</p>
-                <p className="truncate text-sm font-medium text-slate-900 dark:text-white">{user?.email}</p>
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="truncate text-sm font-medium text-foreground">{user?.email}</p>
               </div>
             </div>
 
@@ -95,8 +95,8 @@ export default function ProfileSidebar({
                 <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-slate-500 dark:text-slate-400">Member Since</p>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                <p className="text-xs text-muted-foreground">Member Since</p>
+                <p className="text-sm font-medium text-foreground">
                   {formatDate(user?.created_at || new Date().toISOString())}
                 </p>
               </div>
@@ -107,7 +107,7 @@ export default function ProfileSidebar({
                 <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-slate-500 dark:text-slate-400">Account Status</p>
+                <p className="text-xs text-muted-foreground">Account Status</p>
                 <div className="mt-0.5 flex items-center gap-2">
                   <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
                   <p className="text-sm font-medium text-green-700 dark:text-green-400">Active</p>
@@ -118,19 +118,19 @@ export default function ProfileSidebar({
         </div>
 
         {/* Quick Stats */}
-        <div className="border-t border-slate-200 bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-4 dark:border-slate-700 dark:from-blue-900/20 dark:to-purple-900/20">
+        <div className="border-t border-border bg-gradient-to-r from-blue-500/5 to-purple-500/5 px-6 py-4">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">0</p>
-              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">Files</p>
+              <p className="text-2xl font-bold text-foreground">0</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Files</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">0</p>
-              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">Notes</p>
+              <p className="text-2xl font-bold text-foreground">0</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Notes</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">0</p>
-              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">MB</p>
+              <p className="text-2xl font-bold text-foreground">0</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">MB</p>
             </div>
           </div>
         </div>

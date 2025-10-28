@@ -71,14 +71,14 @@ export default function ProfilePage() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
+    <div className="min-h-screen bg-background transition-colors">
       {/* Header */}
       <div className="bg-card border-b border-border transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Settings</h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Manage your account settings and preferences</p>
+              <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+              <p className="text-sm text-muted-foreground mt-1">Manage your account settings and preferences</p>
             </div>
           </div>
         </div>

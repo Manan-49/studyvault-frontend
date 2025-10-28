@@ -37,7 +37,7 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
     <div className="space-y-3">
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-slate-600">Password Strength</span>
+          <span className="text-xs font-medium text-muted-foreground">Password Strength</span>
           <span className={`text-xs font-semibold ${
             strength <= 1 ? 'text-red-600' :
             strength <= 2 ? 'text-orange-600' :
@@ -47,7 +47,7 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
             {getStrengthLabel()}
           </span>
         </div>
-        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${percentage}%` }}
@@ -71,7 +71,7 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
             ) : (
               <X className="h-3.5 w-3.5 text-slate-300" />
             )}
-            <span className={req.test ? 'text-green-700' : 'text-slate-500'}>
+            <span className={req.test ? 'text-green-700' : 'text-muted-foreground'}>
               {req.label}
             </span>
           </motion.div>

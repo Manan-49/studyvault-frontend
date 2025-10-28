@@ -1,170 +1,245 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Document, Page, pdfjs } from 'react-pdf'
 import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize, Loader2, AlertCircle } from 'lucide-react'
+import { useGesture } from 'react-use-gesture'
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  ZoomIn, 
+  ZoomOut, 
+  RotateCw,
+  Maximize, 
+  Loader2, 
+  AlertCircle,
+  Download,
+  BookOpen,
+  Eye,
+  EyeOff
+} from 'lucide-react'
+import { ReadingProgress } from './reading-progress'
+import { PageBookmarks } from './page-bookmarks'
+import { PageJump } from './page-jump'
+
+if (typeof window !== 'undefined') {
+  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
+}
 
 interface PDFViewerProps {
   url: string
   fileName: string
-  totalPages?: number
+  fileId: string
 }
 
-export function PDFViewerEnhanced({ url, fileName, totalPages }: PDFViewerProps) {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [zoom, setZoom] = useState(100)
+export function PDFViewerEnhanced({ url, fileName, fileId }: PDFViewerProps) {
+  const [numPages, setNumPages] = useState<number | null>(null)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [scale, setScale] = useState(1.0)
+  const [rotation, setRotation] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [readingMode, setReadingMode] = useState(false)
 
-  // Detect mobile device
+  // Load last read position
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+    const saved = localStorage.getItem(`reading-progress-${fileId}`)
+    if (saved) {
+      const data = JSON.parse(saved)
+      if (data.currentPage) {
+        setPageNumber(data.currentPage)
+      }
     }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  }, [fileId])
 
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 200))
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 25, 50))
-  
-  const handleFullScreen = () => {
-    if (url) {
-      window.open(url, '_blank')
-    }
-  }
+  // Touch gestures
+  const bind = useGesture({
+    onPinch: ({ offset: [pinchScale] }) => {
+      setScale(Math.max(0.5, Math.min(3, pinchScale)))
+    },
+  })
 
-  const handleIframeLoad = () => {
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages)
     setLoading(false)
-    setError(false)
+    setError(null)
   }
 
-  const handleIframeError = () => {
+  function onDocumentLoadError(error: Error) {
+    console.error('PDF load error:', error)
+    setError('Failed to load PDF')
     setLoading(false)
-    setError(true)
   }
 
-  // Build iframe src with page and zoom parameters
-  const iframeSrc = `${url}#page=${currentPage}&zoom=${zoom}`
+  const handlePrevPage = () => setPageNumber((prev) => Math.max(prev - 1, 1))
+  const handleNextPage = () => setPageNumber((prev) => Math.min(prev + 1, numPages || 1))
+  const handleZoomIn = () => setScale((prev) => Math.min(prev + 0.25, 3))
+  const handleZoomOut = () => setScale((prev) => Math.max(prev - 0.25, 0.5))
+  const handleRotate = () => setRotation((r) => (r + 90) % 360)
+  const handleFullScreen = () => window.open(url, '_blank')
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-t-2xl border-b border-border bg-card/80 p-3 backdrop-blur-sm">
-        {/* Zoom Controls */}
-        <div className="flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleZoomOut}
-            disabled={zoom <= 50}
-            className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Zoom out"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </motion.button>
-          <span className="min-w-[4rem] text-center text-sm font-medium text-muted-foreground">
-            {zoom}%
-          </span>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleZoomIn}
-            disabled={zoom >= 200}
-            className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Zoom in"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </motion.button>
+    <div className="flex h-full gap-4">
+      {/* Sidebar - Learning Tools */}
+      {!readingMode && (
+        <div className="hidden w-64 flex-shrink-0 space-y-4 overflow-y-auto rounded-lg border border-border bg-card p-4 lg:block">
+          {numPages && (
+            <>
+              <ReadingProgress
+                fileId={fileId}
+                currentPage={pageNumber}
+                totalPages={numPages}
+                onJumpToPage={setPageNumber}
+              />
+              
+              <div className="border-t border-border pt-4">
+                <PageJump
+                  currentPage={pageNumber}
+                  totalPages={numPages}
+                  onJumpToPage={setPageNumber}
+                />
+              </div>
+
+              <div className="border-t border-border pt-4">
+                <PageBookmarks
+                  fileId={fileId}
+                  currentPage={pageNumber}
+                  onJumpToPage={setPageNumber}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Main Viewer */}
+      <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card">
+        {/* Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card/80 p-2 backdrop-blur-sm">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleZoomOut}
+              disabled={scale <= 0.5}
+              className="rounded-lg bg-muted p-2 hover:bg-accent disabled:opacity-50"
+              title="Zoom Out"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </button>
+            <span className="min-w-[3.5rem] text-center text-sm font-medium">
+              {Math.round(scale * 100)}%
+            </span>
+            <button
+              onClick={handleZoomIn}
+              disabled={scale >= 3}
+              className="rounded-lg bg-muted p-2 hover:bg-accent disabled:opacity-50"
+              title="Zoom In"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </button>
+          </div>
+
+          {numPages && numPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handlePrevPage}
+                disabled={pageNumber === 1}
+                className="rounded-lg bg-muted p-2 hover:bg-accent disabled:opacity-50"
+                title="Previous"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="min-w-[5rem] text-center text-sm font-medium">
+                {pageNumber} / {numPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={pageNumber === numPages}
+                className="rounded-lg bg-muted p-2 hover:bg-accent disabled:opacity-50"
+                title="Next"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleRotate}
+              className="rounded-lg bg-muted p-2 hover:bg-accent"
+              title="Rotate"
+            >
+              <RotateCw className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setReadingMode(!readingMode)}
+              className="rounded-lg bg-muted p-2 hover:bg-accent lg:block hidden"
+              title="Reading Mode"
+            >
+              {readingMode ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            </button>
+            <button
+              onClick={handleFullScreen}
+              className="rounded-lg bg-blue-600 p-2 text-white hover:bg-blue-700"
+              title="Fullscreen"
+            >
+              <Maximize className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Page Navigation */}
-        {totalPages && totalPages > 1 && (
-          <div className="flex items-center gap-2">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </motion.button>
-            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-              {isMobile ? `${currentPage}/${totalPages}` : `Page ${currentPage} of ${totalPages}`}
-            </span>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="rounded-lg bg-muted p-2 transition-colors hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Next page"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </motion.button>
-          </div>
-        )}
-
-        {/* Full Screen */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleFullScreen}
-          className="rounded-lg bg-blue-600 p-2 text-white transition-colors hover:bg-blue-700"
-          aria-label="Open in new tab"
-        >
-          <Maximize className="h-4 w-4" />
-        </motion.button>
-      </div>
-
-      {/* PDF Iframe */}
-      <div className="relative flex-1 overflow-hidden rounded-b-2xl bg-muted">
-        {loading && !error && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
-              <p className="mt-2 text-sm text-muted-foreground">Loading PDF...</p>
+        {/* PDF Content */}
+        <div className="relative flex-1 overflow-auto bg-muted" {...bind()}>
+          {loading && !error && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              <div className="text-center">
+                <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
+                <p className="mt-2 text-sm text-muted-foreground">Loading PDF...</p>
+              </div>
             </div>
-          </div>
-        )}
-        
-        {error ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-card">
-            <div className="text-center p-6">
-              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-card-foreground mb-2">
-                Failed to load PDF
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                The PDF preview could not be loaded. Try downloading the file instead.
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleFullScreen}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          )}
+
+          {error ? (
+            <div className="flex h-full items-center justify-center p-6">
+              <div className="max-w-md text-center">
+                <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
+                <h3 className="mb-2 text-lg font-semibold text-foreground">Failed to load PDF</h3>
+                <p className="mb-4 text-sm text-muted-foreground">{error}</p>
+                <button
+                  onClick={handleFullScreen}
+                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  <Download className="h-4 w-4" />
+                  Open in New Tab
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center p-4">
+              <Document
+                file={url}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                loading={null}
+                options={{
+                  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                  cMapPacked: true,
+                }}
               >
-                Open in New Tab
-              </motion.button>
+                <motion.div
+                  animate={{ scale, rotate: rotation }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Page
+                    pageNumber={pageNumber}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    className="overflow-hidden rounded-lg shadow-2xl"
+                  />
+                </motion.div>
+              </Document>
             </div>
-          </div>
-        ) : (
-          <iframe
-            src={iframeSrc}
-            title={fileName}
-            className="h-full w-full border-0"
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
-            style={{
-              width: '100%',
-              height: '100%',
-            }}
-          />
-        )}
+          )}
+        </div>
       </div>
     </div>
   )

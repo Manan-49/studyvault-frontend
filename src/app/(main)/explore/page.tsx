@@ -3,21 +3,18 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Plus, Upload as UploadIcon, ArrowUpDown, Sparkles } from 'lucide-react'
+import { Plus, Upload as UploadIcon, Search, FolderOpen, FileText, AlertCircle } from 'lucide-react'
 import { filesApi } from '@/lib/api/files'
 import { foldersApi } from '@/lib/api/folders'
 import { searchApi } from '@/lib/api/search'
 import { EnhancedBreadcrumb } from '@/components/explore/enhanced-breadcrumb'
-import { SearchBarEnhanced } from '@/components/explore/search-bar-enhanced'
-import { ViewToggle, ViewMode } from '@/components/explore/view-toggle'
 import { FolderCardEnhanced } from '@/components/explore/folder-card-enhanced'
-import { FileCardEnhanced } from '@/components/explore/file-card-enhanced'
-import { LoadingGrid } from '@/components/explore/loading-grid'
 import { EmptyState } from '@/components/explore/empty-state'
 import { CreateFolderDialog } from '@/components/explore/create-folder-dialog'
-import { MoveFileDialog } from '@/components/explore/move-file-dialog'
 import { UploadDialogEnhanced } from '@/components/explore/upload-dialog-enhanced'
 import { ToastSimple } from '@/components/explore/toast-simple'
+import { formatBytes } from '@/lib/utils/format'
+import { formatDistanceToNow } from 'date-fns'
 import type { SortOption } from '@/types'
 
 interface Folder {
@@ -49,13 +46,13 @@ export default function ExplorePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('date-desc')
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [currentFolder, setCurrentFolder] = useState<Folder | null>(null)
   const [folders, setFolders] = useState<Folder[]>([])
   const [files, setFiles] = useState<FileItem[]>([])
   const [allFolders, setAllFolders] = useState<Folder[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<{
     files: FileItem[]
@@ -66,10 +63,7 @@ export default function ExplorePage() {
   // Dialog states
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false)
   const [isUploadOpen, setIsUploadOpen] = useState(false)
-  const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false)
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
   const [isCreatingFolder, setIsCreatingFolder] = useState(false)
-  const [isMovingFile, setIsMovingFile] = useState(false)
 
   // Toast state
   const [toast, setToast] = useState<{
@@ -78,27 +72,13 @@ export default function ExplorePage() {
     type: 'success' | 'error'
   }>({ show: false, message: '', type: 'success' })
 
-  // Load view mode from localStorage
-  useEffect(() => {
-    const savedView = localStorage.getItem('explore-view-mode') as ViewMode
-    if (savedView) setViewMode(savedView)
-  }, [])
-
-  // Save view mode to localStorage
-  const handleViewChange = (view: ViewMode) => {
-    setViewMode(view)
-    localStorage.setItem('explore-view-mode', view)
-  }
-
   // Debounce search
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm)
-    }, 300)
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300)
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  // Fetch folder/file data (normal browsing)
+  // Fetch data
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
@@ -115,6 +95,11 @@ export default function ExplorePage() {
       setFolders(foldersData?.items || [])
       setFiles(filesData?.items || [])
       setAllFolders(allFoldersData?.items || [])
+      
+      // Auto-select first file if none selected
+      if (!selectedFile && filesData?.items?.length > 0) {
+        setSelectedFile(filesData.items[0])
+      }
     } catch (err: any) {
       console.error('Failed to fetch data:', err)
       setError('Failed to load files and folders')
@@ -139,18 +124,11 @@ export default function ExplorePage() {
       const searchFolders: Folder[] = []
 
       response.items.forEach((item) => {
-        if (item.type === 'file' && item.file) {
-          searchFiles.push(item.file)
-        } else if (item.type === 'folder' && item.folder) {
-          searchFolders.push(item.folder)
-        }
+        if (item.type === 'file' && item.file) searchFiles.push(item.file)
+        else if (item.type === 'folder' && item.folder) searchFolders.push(item.folder)
       })
 
-      setSearchResults({
-        files: searchFiles,
-        folders: searchFolders,
-        total: response.meta.total,
-      })
+      setSearchResults({ files: searchFiles, folders: searchFolders, total: response.meta.total })
     } catch (err) {
       console.error('Search failed:', err)
       showToast('Search failed', 'error')
@@ -160,26 +138,19 @@ export default function ExplorePage() {
     }
   }, [])
 
-  // Initial data load
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  // Trigger search when debounced search changes
   useEffect(() => {
-    if (debouncedSearch) {
-      performSearch(debouncedSearch)
-    } else {
-      setSearchResults(null)
-    }
+    if (debouncedSearch) performSearch(debouncedSearch)
+    else setSearchResults(null)
   }, [debouncedSearch, performSearch])
 
-  // Show toast helper
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ show: true, message, type })
   }
 
-  // Create folder
   const handleCreateFolder = async (name: string) => {
     setIsCreatingFolder(true)
     try {
@@ -188,48 +159,35 @@ export default function ExplorePage() {
       setIsCreateFolderOpen(false)
       showToast('Folder created successfully', 'success')
     } catch (err) {
-      console.error('Failed to create folder:', err)
       showToast('Failed to create folder', 'error')
     } finally {
       setIsCreatingFolder(false)
     }
   }
 
-  // Delete folder
   const handleDeleteFolder = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this folder?')) return
-
+    if (!confirm('Delete this folder and all its contents?')) return
     try {
       await foldersApi.delete(id)
       await fetchData()
-      if (searchResults) {
-        performSearch(debouncedSearch)
-      }
       showToast('Folder deleted successfully', 'success')
     } catch (err) {
-      console.error('Failed to delete folder:', err)
       showToast('Failed to delete folder', 'error')
     }
   }
 
-  // Delete file
   const handleDeleteFile = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this file?')) return
-
+    if (!confirm('Delete this file?')) return
     try {
       await filesApi.delete(id)
+      if (selectedFile?.id === id) setSelectedFile(null)
       await fetchData()
-      if (searchResults) {
-        performSearch(debouncedSearch)
-      }
       showToast('File deleted successfully', 'success')
     } catch (err) {
-      console.error('Failed to delete file:', err)
       showToast('Failed to delete file', 'error')
     }
   }
 
-  // Download file
   const handleDownload = async (file: FileItem) => {
     try {
       const blob = await filesApi.download(file.id)
@@ -243,316 +201,246 @@ export default function ExplorePage() {
       document.body.removeChild(a)
       showToast('Download started', 'success')
     } catch (err) {
-      console.error('Download failed:', err)
       showToast('Download failed', 'error')
     }
   }
 
-  // Move file
-  const handleMoveFile = async (folderId: string | null) => {
-    if (!selectedFileId) return
-    setIsMovingFile(true)
-
-    try {
-      await filesApi.update(selectedFileId, { folder_id: folderId })
-      await fetchData()
-      if (searchResults) {
-        performSearch(debouncedSearch)
-      }
-      setIsMoveDialogOpen(false)
-      setSelectedFileId(null)
-      showToast('File moved successfully', 'success')
-    } catch (err) {
-      console.error('Failed to move file:', err)
-      showToast('Failed to move file', 'error')
-    } finally {
-      setIsMovingFile(false)
-    }
-  }
-
-  // Upload files
   const handleUpload = async (uploadFiles: File[]) => {
     let successCount = 0
-    let failCount = 0
-
     for (const file of uploadFiles) {
       try {
         const formData = new FormData()
         formData.append('file', file)
         formData.append('title', file.name.replace(/\.[^/.]+$/, ''))
-
-        if (currentFolderId && currentFolderId.trim() !== '') {
-          formData.append('folder_id', currentFolderId)
-        }
-
+        if (currentFolderId) formData.append('folder_id', currentFolderId)
         formData.append('ocr', 'true')
-
         await filesApi.upload(formData)
         successCount++
       } catch (error) {
         console.error('Upload error:', error)
-        failCount++
       }
     }
-
     await fetchData()
-
-    if (successCount > 0) {
-      showToast(
-        `Successfully uploaded ${successCount} file(s)${failCount > 0 ? `, ${failCount} failed` : ''}`,
-        'success'
-      )
-    } else {
-      showToast('All uploads failed', 'error')
-    }
+    showToast(`Successfully uploaded ${successCount} file(s)`, 'success')
   }
 
-  // Determine which data to display (search results or folder contents)
   const displayFolders = searchResults ? searchResults.folders : folders
   const displayFiles = searchResults ? searchResults.files : files
 
-  // Filter and sort
   const breadcrumbs = currentFolder ? currentFolder.path.split('/').filter(Boolean) : []
-
-  let filteredFolders = [...displayFolders].sort((a, b) => {
-    switch (sortBy) {
-      case 'name-asc':
-        return a.name.localeCompare(b.name)
-      case 'name-desc':
-        return b.name.localeCompare(a.name)
-      case 'date-asc':
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      case 'date-desc':
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      case 'size-asc':
-      case 'size-desc':
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      default:
-        return 0
-    }
-  })
-
-  let filteredFiles = [...displayFiles].sort((a, b) => {
-    switch (sortBy) {
-      case 'name-asc':
-        return a.title.localeCompare(b.title)
-      case 'name-desc':
-        return b.title.localeCompare(a.title)
-      case 'date-asc':
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      case 'date-desc':
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      case 'size-asc':
-        return a.size_bytes - b.size_bytes
-      case 'size-desc':
-        return b.size_bytes - a.size_bytes
-      default:
-        return 0
-    }
-  })
-
-  const totalResults = filteredFolders.length + filteredFiles.length
-  const hasContent = folders.length > 0 || files.length > 0
-  const hasFilteredContent = filteredFolders.length > 0 || filteredFiles.length > 0
-
   const isShowingSearchResults = Boolean(searchResults)
+  const isAtRoot = !currentFolderId
+
+  // Sort files
+  let sortedFiles = [...displayFiles].sort((a, b) => {
+    switch (sortBy) {
+      case 'name-asc': return a.title.localeCompare(b.title)
+      case 'name-desc': return b.title.localeCompare(a.title)
+      case 'date-asc': return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      case 'date-desc': return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'size-asc': return a.size_bytes - b.size_bytes
+      case 'size-desc': return b.size_bytes - a.size_bytes
+      default: return 0
+    }
+  })
 
   return (
-    <div className="w-full space-y-6 pb-8">
-      {/* Toast */}
-      <ToastSimple
-        show={toast.show}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ ...toast, show: false })}
-      />
+    <div className="flex h-[calc(100vh-4rem)] w-full flex-col gap-4 pb-4">
+      <ToastSimple show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />
 
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
-      >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
-            📂 Explore
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            {isShowingSearchResults
-              ? `Search results for "${debouncedSearch}"`
-              : 'Browse and organize your files'}
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Explore</h1>
+          <p className="text-sm text-muted-foreground">
+            {isShowingSearchResults ? `${searchResults?.total || 0} results for "${debouncedSearch}"` : 'Browse your study materials'}
           </p>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsCreateFolderOpen(true)}
-            className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-4 py-2.5 font-semibold text-card-foreground transition-all hover:bg-accent hover:text-accent-foreground"
-          >
-            <Plus className="h-5 w-5" />
-            <span className="hidden sm:inline">New Folder</span>
-          </motion.button>
+          {!isAtRoot && (
+            <>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsCreateFolderOpen(true)}
+                className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-4 py-2 font-semibold text-card-foreground hover:bg-accent"
+              >
+                <Plus className="h-5 w-5" />
+                <span className="hidden sm:inline">Folder</span>
+              </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsUploadOpen(true)}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 font-semibold text-white shadow-lg transition-all hover:shadow-xl"
-          >
-            <UploadIcon className="h-5 w-5" />
-            <span className="hidden sm:inline">Upload Files</span>
-          </motion.button>
-        </div>
-      </motion.div>
-
-      {/* Breadcrumb - Only show when NOT searching */}
-      {!isShowingSearchResults && (
-        <EnhancedBreadcrumb path={breadcrumbs} currentFolderId={currentFolderId} />
-      )}
-
-      {/* Search, Sort & View Toggle */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex-1">
-          <SearchBarEnhanced
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search files, folders, and content (OCR-powered)..."
-            resultCount={isShowingSearchResults ? totalResults : undefined}
-          />
-          {isSearching && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-2 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400"
-            >
-              <Sparkles className="h-4 w-4 animate-pulse" />
-              <span>Searching through OCR text...</span>
-            </motion.div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsUploadOpen(true)}
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 font-semibold text-white shadow-lg"
+              >
+                <UploadIcon className="h-5 w-5" />
+                <span className="hidden sm:inline">Upload</span>
+              </motion.button>
+            </>
           )}
-        </div>
-
-        <div className="flex gap-2">
-          {/* Sort Dropdown */}
-          <div className="relative flex-1 sm:flex-none">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="h-12 w-full appearance-none rounded-xl border-2 border-border bg-background px-4 pr-10 text-sm font-medium text-foreground outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 sm:w-auto"
+          {isAtRoot && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsCreateFolderOpen(true)}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 font-semibold text-white shadow-lg"
             >
-              <option value="date-desc">📅 Newest First</option>
-              <option value="date-asc">📅 Oldest First</option>
-              <option value="name-asc">🔤 A → Z</option>
-              <option value="name-desc">🔤 Z → A</option>
-              <option value="size-desc">💾 Largest First</option>
-              <option value="size-asc">💾 Smallest First</option>
-            </select>
-            <ArrowUpDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          </div>
-
-          {/* View Toggle */}
-          <ViewToggle view={viewMode} onChange={handleViewChange} />
+              <Plus className="h-5 w-5" />
+              <span className="hidden sm:inline">New Folder</span>
+            </motion.button>
+          )}
         </div>
       </div>
 
-      {/* Content */}
-      {loading ? (
-        <LoadingGrid count={8} viewMode={viewMode} />
-      ) : error ? (
-        <div className="rounded-2xl border-2 border-red-200 bg-red-50 p-8 text-center dark:border-red-900 dark:bg-red-900/20">
-          <p className="text-red-800 dark:text-red-400">{error}</p>
-        </div>
-      ) : !hasContent && !isShowingSearchResults ? (
-        <EmptyState
-          type="empty"
-          onUpload={() => setIsUploadOpen(true)}
-          onCreateFolder={() => setIsCreateFolderOpen(true)}
-        />
-      ) : !hasFilteredContent && isShowingSearchResults ? (
-        <EmptyState type="search" searchTerm={debouncedSearch} />
-      ) : (
-        <>
-          {/* Folders */}
-          {filteredFolders.length > 0 && (
-            <div>
-              <motion.h2
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="mb-4 text-lg font-semibold text-foreground"
-              >
-                📁 Folders ({filteredFolders.length})
-              </motion.h2>
-              <div
-                className={`grid gap-4 ${
-                  viewMode === 'list'
-                    ? 'grid-cols-1'
-                    : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                }`}
-              >
-                {filteredFolders.map((folder, index) => (
-                  <FolderCardEnhanced
-                    key={folder.id}
-                    folder={folder}
-                    onClick={() => {
-                      setSearchTerm('')
-                      setSearchResults(null)
-                      router.push(`/explore?folder_id=${folder.id}`)
-                    }}
-                    onDelete={() => handleDeleteFolder(folder.id)}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+      {!isShowingSearchResults && <EnhancedBreadcrumb path={breadcrumbs} currentFolderId={currentFolderId} />}
 
-          {/* Files */}
-          {filteredFiles.length > 0 && (
-            <div>
-              <motion.h2
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="mb-4 text-lg font-semibold text-foreground"
-              >
-                📄 Files ({filteredFiles.length})
-                {isShowingSearchResults && (
-                  <span className="ml-2 text-sm font-normal text-muted-foreground">
-                    (including OCR matches)
-                  </span>
-                )}
-              </motion.h2>
-              <div
-                className={`grid gap-4 ${
-                  viewMode === 'list'
-                    ? 'grid-cols-1'
-                    : viewMode === 'compact'
-                      ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6'
-                      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                }`}
-              >
-                {filteredFiles.map((file, index) => (
-                  <FileCardEnhanced
-                    key={file.id}
-                    file={file}
-                    onClick={() => router.push(`/explore/${file.id}`)}
-                    onDownload={() => handleDownload(file)}
-                    onMove={() => {
-                      setSelectedFileId(file.id)
-                      setIsMoveDialogOpen(true)
-                    }}
-                    onDelete={() => handleDeleteFile(file.id)}
-                    index={index}
-                    viewMode={viewMode}
-                  />
-                ))}
+      {/* Search & Sort */}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search files and folders..."
+            className="h-12 w-full rounded-xl border-2 border-border bg-background pl-10 pr-4 text-sm text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+          />
+        </div>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortOption)}
+          className="h-12 rounded-xl border-2 border-border bg-background px-4 text-sm font-medium text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+        >
+          <option value="date-desc">Newest First</option>
+          <option value="date-asc">Oldest First</option>
+          <option value="name-asc">A → Z</option>
+          <option value="name-desc">Z → A</option>
+          <option value="size-desc">Largest First</option>
+          <option value="size-asc">Smallest First</option>
+        </select>
+      </div>
+
+      {/* Two-Pane Layout */}
+      <div className="flex flex-1 gap-4 overflow-hidden">
+        {/* Left: List */}
+        <div className="flex w-full flex-col gap-4 overflow-y-auto lg:w-1/2">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                <p className="mt-4 text-sm text-muted-foreground">Loading...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="rounded-lg border border-red-300 bg-red-50 p-6 text-center dark:bg-red-950/20">
+              <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-3" />
+              <p className="text-red-700 dark:text-red-400">{error}</p>
+            </div>
+          ) : (
+            <>
+              {/* Folders */}
+              {displayFolders.length > 0 && (
+                <div>
+                  <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <FolderOpen className="h-4 w-4" />
+                    Folders ({displayFolders.length})
+                  </h2>
+                  <div className="grid gap-2">
+                    {displayFolders.map((folder, index) => (
+                      <FolderCardEnhanced
+                        key={folder.id}
+                        folder={folder}
+                        onClick={() => {
+                          setSearchTerm('')
+                          setSearchResults(null)
+                          router.push(`/explore?folder_id=${folder.id}`)
+                        }}
+                        onDelete={() => handleDeleteFolder(folder.id)}
+                        index={index}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Files */}
+              {sortedFiles.length > 0 && (
+                <div>
+                  <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <FileText className="h-4 w-4" />
+                    Files ({sortedFiles.length})
+                  </h2>
+                  <div className="space-y-2">
+                    {sortedFiles.map((file) => (
+                      <motion.div
+                        key={file.id}
+                        whileHover={{ scale: 1.01 }}
+                        onClick={() => setSelectedFile(file)}
+                        onDoubleClick={() => router.push(`/explore/${file.id}`)}
+                        className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
+                          selectedFile?.id === file.id
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border bg-card hover:border-primary/50'
+                        }`}
+                      >
+                        <FileText className="h-8 w-8 text-blue-500" />
+                        <div className="min-w-0 flex-1">
+                          <h3 className="truncate text-sm font-semibold text-card-foreground">{file.title}</h3>
+                          <p className="text-xs text-muted-foreground">
+                            {formatBytes(file.size_bytes)} • {formatDistanceToNow(new Date(file.created_at), { addSuffix: true })}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {displayFolders.length === 0 && sortedFiles.length === 0 && (
+                <EmptyState
+                  type={isShowingSearchResults ? 'search' : 'empty'}
+                  searchTerm={debouncedSearch}
+                  onUpload={currentFolderId ? () => setIsUploadOpen(true) : undefined}
+                  onCreateFolder={() => setIsCreateFolderOpen(true)}
+                />
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Right: Preview (Desktop only) */}
+        <div className="hidden w-1/2 flex-col gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 lg:flex">
+          {selectedFile ? (
+            <>
+              <div className="flex items-center justify-between">
+                <h3 className="truncate text-lg font-bold text-card-foreground">{selectedFile.title}</h3>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push(`/explore/${selectedFile.id}`)}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  Open
+                </motion.button>
+              </div>
+              <div className="flex-1 overflow-auto rounded-lg bg-muted p-8 text-center">
+                <FileText className="mx-auto h-24 w-24 text-blue-500 mb-4" />
+                <p className="text-sm text-muted-foreground">Double-click file to view</p>
+              </div>
+            </>
+          ) : (
+            <div className="flex h-full items-center justify-center text-center">
+              <div>
+                <FileText className="mx-auto h-16 w-16 text-muted-foreground mb-3" />
+                <p className="text-sm text-muted-foreground">Select a file to preview</p>
               </div>
             </div>
           )}
-        </>
-      )}
+        </div>
+      </div>
 
       {/* Dialogs */}
       <CreateFolderDialog
@@ -560,17 +448,6 @@ export default function ExplorePage() {
         onClose={() => setIsCreateFolderOpen(false)}
         onCreate={handleCreateFolder}
         isLoading={isCreatingFolder}
-      />
-
-      <MoveFileDialog
-        isOpen={isMoveDialogOpen}
-        onClose={() => {
-          setIsMoveDialogOpen(false)
-          setSelectedFileId(null)
-        }}
-        onMove={handleMoveFile}
-        folders={allFolders}
-        isLoading={isMovingFile}
       />
 
       <UploadDialogEnhanced

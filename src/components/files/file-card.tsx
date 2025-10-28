@@ -61,7 +61,7 @@ export function FileCard({ file, onDelete, onEdit }: FileCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <FileText className="h-16 w-16 text-gray-400" />
+              <FileText className="h-16 w-16 text-muted-foreground" />
             </div>
           )}
         </div>

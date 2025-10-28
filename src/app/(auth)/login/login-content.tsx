@@ -151,7 +151,7 @@ export default function LoginContent() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 dark:from-gray-950 dark:via-blue-950/50 dark:to-indigo-950/30">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 ">
       {/* Animated Background */}
       <BackgroundDecoration />
 

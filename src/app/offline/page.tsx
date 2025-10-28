@@ -38,10 +38,10 @@ export default function OfflinePage() {
           {/* Content */}
           <div className="p-8 text-center space-y-6">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+              <h1 className="text-2xl font-bold text-slate-900  mb-2">
                 You're Offline
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-muted-foreground">
                 No internet connection detected. Please check your network and try again.
               </p>
             </div>
@@ -58,8 +58,8 @@ export default function OfflinePage() {
             </motion.button>
 
             {/* Info */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+            <div className="pt-4 border-t border-border">
+              <p className="text-xs text-muted-foreground">
                 StudyVault requires an active internet connection to access your study materials.
               </p>
             </div>
@@ -73,9 +73,9 @@ export default function OfflinePage() {
           transition={{ delay: 0.5 }}
           className="mt-6 text-center"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-full border border-slate-200 dark:border-slate-700">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-card/50 backdrop-blur-sm rounded-full border border-border">
             <div className="h-2 w-2 bg-red-500 rounded-full animate-pulse" />
-            <span className="text-sm text-slate-600 dark:text-slate-400">Offline Mode</span>
+            <span className="text-sm text-muted-foreground">Offline Mode</span>
           </div>
         </motion.div>
       </motion.div>

@@ -104,7 +104,7 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative w-full overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-5 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 sm:rounded-3xl sm:p-6 lg:p-8"
+        className="relative w-full overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 p-5 sm:rounded-3xl sm:p-6 lg:p-8"
       >
         {/* Decorative blur circles - CONTAINED */}
         <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-blue-400/20 blur-3xl sm:-right-20 sm:-top-20 sm:h-64 sm:w-64" />

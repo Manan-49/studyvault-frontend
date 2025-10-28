@@ -25,37 +25,37 @@ export default function AccountStatsCard({ stats, loading }: AccountStatsCardPro
       label: 'Total Files',
       value: stats.files,
       color: 'from-blue-500 to-cyan-500',
-      bgColor: 'bg-blue-50',
+      bgColor: 'bg-blue-500/5',
     },
     {
       icon: HardDrive,
       label: 'Storage Used',
       value: formatStorage(stats.storage),
       color: 'from-purple-500 to-pink-500',
-      bgColor: 'bg-purple-50',
+      bgColor: 'bg-purple-500/5',
     },
     {
       icon: BookOpen,
       label: 'Notes Created',
       value: stats.notes,
       color: 'from-green-500 to-emerald-500',
-      bgColor: 'bg-green-50',
+      bgColor: 'bg-green-500/5',
     },
     {
       icon: TrendingUp,
       label: 'This Week',
       value: '+12',
       color: 'from-orange-500 to-red-500',
-      bgColor: 'bg-orange-50',
+      bgColor: 'bg-orange-500/5',
     },
   ]
 
   return (
     <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200">
-        <h2 className="text-lg font-semibold text-slate-900">Account Statistics</h2>
-        <p className="text-sm text-slate-600 mt-1">Your activity overview</p>
+      <div className="bg-gradient-to-r from-muted/30 to-muted/50 px-6 py-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground">Account Statistics</h2>
+        <p className="text-sm text-muted-foreground mt-1">Your activity overview</p>
       </div>
 
       {/* Stats Grid */}
@@ -68,7 +68,7 @@ export default function AccountStatsCard({ stats, loading }: AccountStatsCardPro
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ y: -4 }}
-              className={`${item.bgColor} rounded-xl p-5 border border-slate-200 hover:shadow-md transition-all cursor-default`}
+              className={`${item.bgColor} rounded-xl p-5 border border-border hover:shadow-md transition-all cursor-default`}
             >
               <div className={`inline-flex p-2.5 rounded-lg bg-gradient-to-br ${item.color} mb-3`}>
                 <item.icon className="h-5 w-5 text-white" />
@@ -76,11 +76,11 @@ export default function AccountStatsCard({ stats, loading }: AccountStatsCardPro
               
               <div className="space-y-1">
                 {loading ? (
-                  <div className="h-7 w-16 bg-slate-200 rounded animate-pulse" />
+                  <div className="h-7 w-16 bg-muted rounded animate-pulse" />
                 ) : (
-                  <div className="text-2xl font-bold text-slate-900">{item.value}</div>
+                  <div className="text-2xl font-bold text-foreground">{item.value}</div>
                 )}
-                <div className="text-xs font-medium text-slate-600">{item.label}</div>
+                <div className="text-xs font-medium text-muted-foreground">{item.label}</div>
               </div>
             </motion.div>
           ))}

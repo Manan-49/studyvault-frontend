@@ -111,7 +111,7 @@ export function EmptyActivity() {
       className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border bg-muted py-16"
     >
       <div className="rounded-full bg-muted p-6">
-        <FileText className="h-12 w-12 text-gray-400" />
+        <FileText className="h-12 w-12 text-muted-foreground" />
       </div>
       <h3 className="mt-4 text-lg font-semibold text-foreground">
         No activity yet
