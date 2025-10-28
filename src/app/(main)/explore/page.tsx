@@ -237,7 +237,7 @@ export default function ExplorePage() {
     : []
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col gap-4 px-4 pb-6 sm:px-0">
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col gap-4 pb-6">
       {/* Toast */}
       <AnimatePresence>
         {toast.show && (
@@ -270,7 +270,7 @@ export default function ExplorePage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowCreateFolder(true)}
-            className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-3 py-2 sm:px-4 sm:py-2.5 font-semibold hover:bg-accent"
+            className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-4 py-2.5 font-semibold hover:bg-accent"
           >
             <FolderPlus className="h-5 w-5" />
             <span className="hidden sm:inline">New Folder</span>
@@ -280,7 +280,7 @@ export default function ExplorePage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowUpload(true)}
-            className="flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 sm:px-4 sm:py-2.5 font-semibold text-white hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 font-semibold text-white hover:bg-blue-700"
           >
             <UploadIcon className="h-5 w-5" />
             <span className="hidden sm:inline">Upload</span>
@@ -373,7 +373,7 @@ export default function ExplorePage() {
                 <Folder className="h-4 w-4" />
                 Folders ({displayFolders.length})
               </h2>
-              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {displayFolders.map((folder) => (
                   <motion.div
                     key={folder.id}
@@ -433,7 +433,7 @@ export default function ExplorePage() {
                 <FileText className="h-4 w-4" />
                 Files ({displayFiles.length})
               </h2>
-              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {displayFiles.map((file) => (
                   <motion.div
                     key={file.id}
@@ -523,7 +523,7 @@ export default function ExplorePage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed left-1/2 top-1/2 z-50 w-[90%] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card p-6 shadow-2xl"
+              className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card p-6 shadow-2xl"
             >
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xl font-bold text-foreground">Create Folder</h2>
@@ -581,7 +581,7 @@ export default function ExplorePage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed left-1/2 top-1/2 z-50 w-[90%] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card p-6 shadow-2xl"
+              className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card p-6 shadow-2xl"
             >
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xl font-bold text-foreground">Upload Files</h2>
