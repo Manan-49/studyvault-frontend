@@ -1,16 +1,15 @@
 // src/app/(main)/explore/[fileId]/page.tsx
-
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft,
   Download,
   Share2,
-  Maximize,
-  Minimize,
+  Maximize2,
+  Minimize2,
   ZoomIn,
   ZoomOut,
   RotateCw,
@@ -29,6 +28,8 @@ import {
   Check,
   Info,
   X,
+  Menu,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { formatBytes } from '@/lib/utils/format'
@@ -48,7 +49,10 @@ interface FileData {
   ocr_text?: string
 }
 
-const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
+interface TouchPoint {
+  x: number
+  y: number
+}
 
 export default function FileViewPage() {
   const params = useParams()
@@ -65,21 +69,23 @@ export default function FileViewPage() {
   const [totalPages, setTotalPages] = useState(0)
   const [zoom, setZoom] = useState(1)
   const [rotation, setRotation] = useState(0)
-  const [offset, setOffset] = useState({ x: 0, y: 0 }) // panning
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const [showInfo, setShowInfo] = useState(false)
   const [showOCR, setShowOCR] = useState(false)
   const [copiedOCR, setCopiedOCR] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
+  const [showToolbar, setShowToolbar] = useState(false)
 
-  // Gesture refs for pinch/pan
-  const gestureRef = useRef<HTMLDivElement | null>(null)
-  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map())
-  const pinchStartDistRef = useRef<number | null>(null)
-  const pinchStartZoomRef = useRef<number>(1)
-  const panPointerIdRef = useRef<number | null>(null)
-  const lastPanRef = useRef<{ x: number; y: number } | null>(null)
+  // Pan and pinch-to-zoom
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState<TouchPoint>({ x: 0, y: 0 })
+  const [initialDistance, setInitialDistance] = useState(0)
+  const [initialZoom, setInitialZoom] = useState(1)
+
+  const imageRef = useRef<HTMLImageElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // Fetch file data
   useEffect(() => {
@@ -127,6 +133,186 @@ export default function FileViewPage() {
     }
   }, [file?.id])
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignore if typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+      const isImage = file?.mime_type.startsWith('image/')
+      const isPDF = file?.mime_type === 'application/pdf'
+
+      switch (e.key) {
+        case '+':
+        case '=':
+          if (isImage) {
+            e.preventDefault()
+            handleZoomIn()
+          }
+          break
+        case '-':
+        case '_':
+          if (isImage) {
+            e.preventDefault()
+            handleZoomOut()
+          }
+          break
+        case 'r':
+        case 'R':
+          if (isImage) {
+            e.preventDefault()
+            handleRotate()
+          }
+          break
+        case 'ArrowLeft':
+          if (isPDF && currentPage > 1) {
+            e.preventDefault()
+            setCurrentPage(p => p - 1)
+          }
+          break
+        case 'ArrowRight':
+          if (isPDF && currentPage < totalPages) {
+            e.preventDefault()
+            setCurrentPage(p => p + 1)
+          }
+          break
+        case 'f':
+        case 'F':
+          e.preventDefault()
+          toggleFullscreen()
+          break
+        case 'Escape':
+          if (isFullscreen) {
+            e.preventDefault()
+            document.exitFullscreen()
+          }
+          if (showInfo) {
+            e.preventDefault()
+            setShowInfo(false)
+          }
+          break
+        case '0':
+          if (isImage && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault()
+            handleResetView()
+          }
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [file, currentPage, totalPages, isFullscreen, showInfo])
+
+  // Touch handlers for pinch-to-zoom and pan
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const isImage = file?.mime_type.startsWith('image/')
+    if (!isImage) return
+
+    const getDistance = (touches: TouchList): number => {
+      const dx = touches[0].clientX - touches[1].clientX
+      const dy = touches[0].clientY - touches[1].clientY
+      return Math.sqrt(dx * dx + dy * dy)
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        // Pinch zoom start
+        e.preventDefault()
+        setInitialDistance(getDistance(e.touches))
+        setInitialZoom(zoom)
+      } else if (e.touches.length === 1 && zoom > 1) {
+        // Pan start
+        const touch = e.touches[0]
+        setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y })
+        setIsDragging(true)
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && initialDistance > 0) {
+        // Pinch zooming
+        e.preventDefault()
+        const currentDistance = getDistance(e.touches)
+        const scale = currentDistance / initialDistance
+        const newZoom = Math.min(Math.max(initialZoom * scale, 0.5), 3)
+        setZoom(newZoom)
+      } else if (e.touches.length === 1 && isDragging && zoom > 1) {
+        // Panning
+        e.preventDefault()
+        const touch = e.touches[0]
+        setPosition({
+          x: touch.clientX - dragStart.x,
+          y: touch.clientY - dragStart.y,
+        })
+      }
+    }
+
+    const handleTouchEnd = () => {
+      setInitialDistance(0)
+      setIsDragging(false)
+    }
+
+    // Mouse wheel zoom
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        const delta = e.deltaY > 0 ? 0.9 : 1.1
+        const newZoom = Math.min(Math.max(zoom * delta, 0.5), 3)
+        setZoom(newZoom)
+      }
+    }
+
+    // Mouse drag for desktop
+    const handleMouseDown = (e: MouseEvent) => {
+      if (zoom > 1) {
+        setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+        setIsDragging(true)
+      }
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && zoom > 1) {
+        setPosition({
+          x: e.clientX - dragStart.x,
+          y: e.clientY - dragStart.y,
+        })
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    container.addEventListener('touchstart', handleTouchStart, { passive: false })
+    container.addEventListener('touchmove', handleTouchMove, { passive: false })
+    container.addEventListener('touchend', handleTouchEnd)
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    container.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart)
+      container.removeEventListener('touchmove', handleTouchMove)
+      container.removeEventListener('touchend', handleTouchEnd)
+      container.removeEventListener('wheel', handleWheel)
+      container.removeEventListener('mousedown', handleMouseDown)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [zoom, position, isDragging, dragStart, initialDistance, initialZoom, file])
+
+  // Reset position when zoom resets
+  useEffect(() => {
+    if (zoom <= 1) {
+      setPosition({ x: 0, y: 0 })
+    }
+  }, [zoom])
+
   // Fullscreen handling
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -137,31 +323,6 @@ export default function FileViewPage() {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
   }, [])
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft' && currentPage > 1) {
-        setCurrentPage((p) => p - 1)
-      } else if (e.key === 'ArrowRight' && currentPage < totalPages) {
-        setCurrentPage((p) => p + 1)
-      } else if (e.key === 'f' || e.key === 'F11') {
-        e.preventDefault()
-        toggleFullscreen()
-      } else if (e.key === 'Escape' && isFullscreen) {
-        document.exitFullscreen()
-      } else if (e.key === '+' || e.key === '=') {
-        handleZoomIn()
-      } else if (e.key === '-') {
-        handleZoomOut()
-      } else if (e.key === 'r' || e.key === 'R') {
-        handleRotate()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyPress)
-    return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [currentPage, totalPages, isFullscreen])
-
   // Auto-hide controls in fullscreen
   useEffect(() => {
     if (!isFullscreen) {
@@ -169,48 +330,51 @@ export default function FileViewPage() {
       return
     }
 
-    let timer: any
-    const handleMouseMove = () => {
+    let timer: NodeJS.Timeout
+    const handleInteraction = () => {
       setShowControls(true)
       clearTimeout(timer)
       timer = setTimeout(() => setShowControls(false), 3000)
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousemove', handleInteraction)
+    window.addEventListener('touchstart', handleInteraction)
+    handleInteraction()
+
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mousemove', handleInteraction)
+      window.removeEventListener('touchstart', handleInteraction)
       clearTimeout(timer)
     }
   }, [isFullscreen])
 
-  // Reset transform when file or page changes
+  // Reset on file change
   useEffect(() => {
     setZoom(1)
     setRotation(0)
-    setOffset({ x: 0, y: 0 })
+    setPosition({ x: 0, y: 0 })
     setCurrentPage(1)
   }, [file?.id])
 
-  // Keep offset reset when zoom returns to 1
-  useEffect(() => {
-    if (zoom <= 1.0001) {
-      setOffset({ x: 0, y: 0 })
-    }
-  }, [zoom])
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen()
-    } else {
-      document.exitFullscreen()
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err)
     }
   }
 
-  const handleZoomIn = () => setZoom((z) => clamp(z + 0.25, 0.5, 3))
-  const handleZoomOut = () => setZoom((z) => clamp(z - 0.25, 0.5, 3))
+  const handleZoomIn = () => setZoom((z) => Math.min(z + 0.25, 3))
+  const handleZoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5))
   const handleRotate = () => setRotation((r) => (r + 90) % 360)
-  const openInNewTab = () => {
-    if (fileUrl) window.open(fileUrl, '_blank', 'noopener,noreferrer')
+  const handleResetView = () => {
+    setZoom(1)
+    setRotation(0)
+    setPosition({ x: 0, y: 0 })
   }
 
   const handleDownload = async () => {
@@ -245,14 +409,6 @@ export default function FileViewPage() {
       }
     } catch (err) {
       console.error('Share failed:', err)
-    }
-  }
-
-  const handleGoToFolder = () => {
-    if (file?.folder_id) {
-      router.push(`/explore?folder_id=${file.folder_id}`)
-    } else {
-      router.push('/explore')
     }
   }
 
@@ -309,69 +465,9 @@ export default function FileViewPage() {
     }
   }
 
-  // Pinch and Pan handlers
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = e.currentTarget
-    el.setPointerCapture(e.pointerId)
-    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-
-    if (pointersRef.current.size === 2) {
-      const pts = Array.from(pointersRef.current.values())
-      pinchStartDistRef.current = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
-      pinchStartZoomRef.current = zoom
-    } else if (pointersRef.current.size === 1 && zoom > 1) {
-      panPointerIdRef.current = e.pointerId
-      lastPanRef.current = { x: e.clientX, y: e.clientY }
-    }
-  }
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!pointersRef.current.has(e.pointerId)) return
-    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-
-    // Pinch
-    if (pointersRef.current.size >= 2 && pinchStartDistRef.current) {
-      const pts = Array.from(pointersRef.current.values())
-      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
-      const scaleFactor = dist / pinchStartDistRef.current
-      setZoom(clamp(pinchStartZoomRef.current * scaleFactor, 0.5, 3))
-      e.preventDefault()
-      return
-    }
-
-    // Pan
-    if (panPointerIdRef.current === e.pointerId && zoom > 1 && lastPanRef.current) {
-      const dx = e.clientX - lastPanRef.current.x
-      const dy = e.clientY - lastPanRef.current.y
-      setOffset((o) => ({ x: o.x + dx, y: o.y + dy }))
-      lastPanRef.current = { x: e.clientX, y: e.clientY }
-      e.preventDefault()
-    }
-  }
-
-  const onPointerUpOrCancel = (e: React.PointerEvent<HTMLDivElement>) => {
-    pointersRef.current.delete(e.pointerId)
-    if (panPointerIdRef.current === e.pointerId) {
-      panPointerIdRef.current = null
-      lastPanRef.current = null
-    }
-    if (pointersRef.current.size < 2) {
-      pinchStartDistRef.current = null
-      pinchStartZoomRef.current = zoom
-    }
-  }
-
-  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    // pinch-to-zoom on trackpads sends ctrl + wheel
-    if (e.ctrlKey) {
-      e.preventDefault()
-      setZoom((z) => clamp(z * (e.deltaY < 0 ? 1.1 : 0.9), 0.5, 3))
-    }
-  }
-
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
           <p className="mt-4 text-sm text-muted-foreground">Loading file...</p>
@@ -382,20 +478,18 @@ export default function FileViewPage() {
 
   if (error || !file) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center p-4">
+      <div className="flex h-screen items-center justify-center bg-background p-4">
         <div className="max-w-md text-center">
           <AlertCircle className="mx-auto mb-4 h-16 w-16 text-red-500" />
           <h2 className="mb-2 text-2xl font-bold text-foreground">File not found</h2>
           <p className="mb-6 text-muted-foreground">{error || 'This file does not exist'}</p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => router.back()}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
           >
             <ArrowLeft className="h-5 w-5" />
             Go Back
-          </motion.button>
+          </button>
         </div>
       </div>
     )
@@ -407,230 +501,273 @@ export default function FileViewPage() {
   const OCRIcon = ocrStatus.icon
 
   return (
-    <div className={`flex flex-col ${isFullscreen ? 'h-screen' : 'min-h-[calc(100vh-4rem)] pb-4'}`}>
+    <div className="flex h-screen flex-col bg-background">
       {/* Header */}
       <AnimatePresence>
         {(!isFullscreen || showControls) && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className={`mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
-              isFullscreen ? 'fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/95 p-4 backdrop-blur-sm' : ''
+          <motion.header
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            exit={{ y: -100 }}
+            className={`z-50 border-b-2 border-border bg-card/95 backdrop-blur-sm ${
+              isFullscreen ? 'absolute left-0 right-0 top-0' : ''
             }`}
           >
-            {/* Title */}
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.back()}
-                className="flex-shrink-0 rounded-xl border-2 border-border bg-card p-2 hover:bg-accent"
+            <div className="flex items-center justify-between gap-2 p-3">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <button
+                  onClick={() => router.back()}
+                  className="flex-shrink-0 rounded-lg border-2 border-border p-2 hover:bg-accent"
+                  aria-label="Go back"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <div className="min-w-0 flex-1">
+                  <h1 className="truncate text-sm font-bold text-foreground sm:text-base">
+                    {file.title}
+                  </h1>
+                  <p className="truncate text-xs text-muted-foreground">{file.filename}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowToolbar(!showToolbar)}
+                className="flex-shrink-0 rounded-lg border-2 border-border p-2 hover:bg-accent lg:hidden"
+                aria-label="Menu"
               >
-                <ArrowLeft className="h-5 w-5" />
-              </motion.button>
-              <div className="min-w-0 flex-1">
-                <h1 className="truncate text-lg font-bold text-foreground sm:text-xl">{file.title}</h1>
-                <p className="truncate text-xs text-muted-foreground sm:text-sm">{file.filename}</p>
+                <Menu className="h-5 w-5" />
+              </button>
+
+              <div className="hidden items-center gap-2 lg:flex">
+                <button
+                  onClick={() => setShowInfo(true)}
+                  className="rounded-lg border-2 border-border p-2 hover:bg-accent"
+                  title="Info"
+                  aria-label="File info"
+                >
+                  <Info className="h-5 w-5" />
+                </button>
+
+                <button
+                  onClick={handleDownload}
+                  className="rounded-lg border-2 border-border p-2 hover:bg-accent"
+                  title="Download"
+                  aria-label="Download"
+                >
+                  <Download className="h-5 w-5" />
+                </button>
+
+                <button
+                  onClick={handleShare}
+                  className="rounded-lg border-2 border-border p-2 hover:bg-accent"
+                  title="Share"
+                  aria-label="Share"
+                >
+                  <Share2 className="h-5 w-5" />
+                </button>
+
+                <button
+                  onClick={toggleFullscreen}
+                  className="rounded-lg bg-blue-600 p-2 text-white hover:bg-blue-700"
+                  title="Fullscreen"
+                  aria-label="Toggle fullscreen"
+                >
+                  {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+                </button>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowInfo(true)}
-                className="rounded-xl border-2 border-border bg-card p-2 hover:bg-accent"
-                title="Info"
-              >
-                <Info className="h-5 w-5" />
-              </motion.button>
+            {/* Mobile Toolbar */}
+            <AnimatePresence>
+              {showToolbar && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden border-t-2 border-border lg:hidden"
+                >
+                  <div className="grid grid-cols-4 gap-2 p-3">
+                    <button
+                      onClick={() => {
+                        setShowInfo(true)
+                        setShowToolbar(false)
+                      }}
+                      className="flex flex-col items-center gap-1 rounded-lg border-2 border-border p-3 hover:bg-accent"
+                    >
+                      <Info className="h-5 w-5" />
+                      <span className="text-xs">Info</span>
+                    </button>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleDownload}
-                className="rounded-xl border-2 border-border bg-card p-2 hover:bg-accent"
-                title="Download"
-              >
-                <Download className="h-5 w-5" />
-              </motion.button>
+                    <button
+                      onClick={() => {
+                        handleDownload()
+                        setShowToolbar(false)
+                      }}
+                      className="flex flex-col items-center gap-1 rounded-lg border-2 border-border p-3 hover:bg-accent"
+                    >
+                      <Download className="h-5 w-5" />
+                      <span className="text-xs">Download</span>
+                    </button>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleShare}
-                className="rounded-xl border-2 border-border bg-card p-2 hover:bg-accent"
-                title="Share"
-              >
-                <Share2 className="h-5 w-5" />
-              </motion.button>
+                    <button
+                      onClick={() => {
+                        handleShare()
+                        setShowToolbar(false)
+                      }}
+                      className="flex flex-col items-center gap-1 rounded-lg border-2 border-border p-3 hover:bg-accent"
+                    >
+                      <Share2 className="h-5 w-5" />
+                      <span className="text-xs">Share</span>
+                    </button>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={toggleFullscreen}
-                className="rounded-xl bg-blue-600 p-2 text-white hover:bg-blue-700"
-                title="Fullscreen"
-              >
-                {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-              </motion.button>
-            </div>
-          </motion.div>
+                    <button
+                      onClick={() => {
+                        toggleFullscreen()
+                        setShowToolbar(false)
+                      }}
+                      className="flex flex-col items-center gap-1 rounded-lg bg-blue-600 p-3 text-white hover:bg-blue-700"
+                    >
+                      {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+                      <span className="text-xs">Fullscreen</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.header>
         )}
       </AnimatePresence>
 
       {/* Viewer */}
-      <div className="relative flex-1 overflow-hidden rounded-xl bg-muted">
-        {/* File Content */}
-        <div className="flex h-full items-center justify-center overflow-auto p-4">
+      <div className="relative flex-1 overflow-hidden bg-muted">
+        <div
+          ref={containerRef}
+          className="flex h-full items-center justify-center overflow-auto p-4"
+          style={{ touchAction: 'none' }}
+        >
           {!fileUrl ? (
             <div className="text-center">
               <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
               <p className="mt-4 text-sm text-muted-foreground">Loading preview...</p>
             </div>
-          ) : (
-            <motion.div
-              ref={gestureRef}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUpOrCancel}
-              onPointerCancel={onPointerUpOrCancel}
-              onWheel={onWheel}
-              className="relative inline-block"
-              animate={{
-                scale: zoom,
-                rotate: rotation,
-                x: offset.x,
-                y: offset.y,
-              }}
-              transition={{ type: 'spring', stiffness: 200, damping: 30 }}
+          ) : isPDF ? (
+            <div className="w-full max-w-4xl">
+              <iframe
+                src={`${fileUrl}#page=${currentPage}&view=FitH`}
+                className="h-[70vh] w-full rounded-lg border-2 border-border bg-white shadow-2xl sm:h-[80vh]"
+                title={file.title}
+              />
+            </div>
+          ) : isImage ? (
+            <motion.img
+              ref={imageRef}
+              src={fileUrl}
+              alt={file.title}
+              className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
               style={{
-                touchAction: 'none', // enables custom pinch/pan
-                transformOrigin: 'center center',
-                cursor: zoom > 1 ? 'grab' : 'default',
+                transform: `translate(${position.x}px, ${position.y}px) scale(${zoom}) rotate(${rotation}deg)`,
+                transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+                cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+                userSelect: 'none',
               }}
-            >
-              {isPDF ? (
-                <>
-                  {/* Prefer object/embed for better mobile support; fallback link */}
-                  <object
-                    data={`${fileUrl}#page=${currentPage}`}
-                    type="application/pdf"
-                    className="rounded-lg shadow-2xl"
-                    style={{
-                      width: '100%',
-                      maxWidth: '900px',
-                      height: isFullscreen ? '85vh' : '70vh',
-                      border: 'none',
-                    }}
-                  >
-                    <div className="max-w-md rounded-xl border-2 border-border bg-card p-6 text-center">
-                      <p className="mb-4 text-sm text-muted-foreground">
-                        PDF preview is not supported on this device.
-                      </p>
-                      <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-                        <button
-                          onClick={openInNewTab}
-                          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                        >
-                          Open in new tab
-                        </button>
-                        <button
-                          onClick={handleDownload}
-                          className="rounded-lg border-2 border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-accent"
-                        >
-                          Download
-                        </button>
-                      </div>
-                    </div>
-                  </object>
-                </>
-              ) : isImage ? (
-                <img
-                  src={fileUrl}
-                  alt={file.title}
-                  className="rounded-lg shadow-2xl"
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: isFullscreen ? '85vh' : '70vh',
-                    objectFit: 'contain',
-                    display: 'block',
-                  }}
-                  draggable={false}
-                />
-              ) : (
-                <div className="max-w-md rounded-xl border-2 border-border bg-card p-8 text-center">
-                  <FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-                  <p className="mb-4 text-muted-foreground">Preview not available for this file type</p>
-                  <button
-                    onClick={handleDownload}
-                    className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
-                  >
-                    Download to View
-                  </button>
-                </div>
-              )}
-            </motion.div>
+              draggable={false}
+            />
+          ) : (
+            <div className="max-w-md rounded-lg border-2 border-border bg-card p-8 text-center">
+              <FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+              <p className="mb-4 text-muted-foreground">Preview not available for this file type</p>
+              <button
+                onClick={handleDownload}
+                className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+              >
+                Download to View
+              </button>
+            </div>
           )}
         </div>
 
-        {/* Floating Controls - mobile-safe placement */}
+        {/* Mobile Hint */}
+        {isImage && !isFullscreen && (
+          <div className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 text-xs text-white sm:hidden">
+            Pinch to zoom • Drag to pan
+          </div>
+        )}
+
+        {/* Floating Controls */}
         <AnimatePresence>
           {(showControls || !isFullscreen) && (isPDF || isImage) && (
             <motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
-              className="fixed z-40 left-4 right-4 bottom-[calc(env(safe-area-inset-bottom)+16px)] sm:left-1/2 sm:right-auto sm:bottom-6 sm:-translate-x-1/2 flex flex-wrap items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card/95 p-3 shadow-2xl backdrop-blur-sm"
+              className="fixed bottom-4 left-4 right-4 z-40 mx-auto max-w-fit"
+              style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
             >
-              {/* Zoom Controls */}
-              <div className="flex items-center gap-1 rounded-xl bg-muted px-2">
-                <button
-                  onClick={handleZoomOut}
-                  disabled={zoom <= 0.5}
-                  className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
-                  title="Zoom Out"
-                >
-                  <ZoomOut className="h-5 w-5" />
-                </button>
-                <span className="min-w-[3.5rem] text-center text-sm font-bold">
-                  {Math.round(zoom * 100)}%
-                </span>
-                <button
-                  onClick={handleZoomIn}
-                  disabled={zoom >= 3}
-                  className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
-                  title="Zoom In"
-                >
-                  <ZoomIn className="h-5 w-5" />
-                </button>
-              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card/95 p-3 shadow-2xl backdrop-blur-sm">
+                {/* Zoom Controls */}
+                {isImage && (
+                  <>
+                    <div className="flex items-center gap-1 rounded-lg bg-muted">
+                      <button
+                        onClick={handleZoomOut}
+                        disabled={zoom <= 0.5}
+                        className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                        title="Zoom Out"
+                        aria-label="Zoom out"
+                      >
+                        <ZoomOut className="h-5 w-5" />
+                      </button>
+                      <span className="min-w-[3.5rem] text-center text-xs font-bold sm:text-sm">
+                        {Math.round(zoom * 100)}%
+                      </span>
+                      <button
+                        onClick={handleZoomIn}
+                        disabled={zoom >= 3}
+                        className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+                        title="Zoom In"
+                        aria-label="Zoom in"
+                      >
+                        <ZoomIn className="h-5 w-5" />
+                      </button>
+                    </div>
 
-              {/* Rotate */}
-              <button
-                onClick={handleRotate}
-                className="rounded-xl bg-muted p-2 hover:bg-accent"
-                title="Rotate"
-              >
-                <RotateCw className="h-5 w-5" />
-              </button>
+                    {/* Rotate */}
+                    <button
+                      onClick={handleRotate}
+                      className="rounded-lg bg-muted p-2 hover:bg-accent"
+                      title="Rotate"
+                      aria-label="Rotate image"
+                    >
+                      <RotateCw className="h-5 w-5" />
+                    </button>
 
-              {/* PDF Page Navigation */}
-              {isPDF && totalPages > 1 && (
-                <>
-                  <div className="hidden h-8 w-px bg-border sm:block" />
-                  <div className="flex items-center gap-1 rounded-xl bg-muted px-2">
+                    {/* Reset (visible when transformed) */}
+                    {(zoom !== 1 || rotation !== 0 || position.x !== 0 || position.y !== 0) && (
+                      <button
+                        onClick={handleResetView}
+                        className="rounded-lg bg-muted px-3 py-2 text-xs font-semibold hover:bg-accent"
+                        title="Reset view"
+                        aria-label="Reset view"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </>
+                )}
+
+                {/* PDF Page Navigation */}
+                {isPDF && totalPages > 1 && (
+                  <div className="flex items-center gap-1 rounded-lg bg-muted">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                       disabled={currentPage === 1}
                       className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
                       title="Previous"
+                      aria-label="Previous page"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
-                    <span className="min-w-[4rem] text-center text-sm font-bold">
+                    <span className="min-w-[4rem] text-center text-xs font-bold sm:text-sm">
                       {currentPage} / {totalPages}
                     </span>
                     <button
@@ -638,12 +775,13 @@ export default function FileViewPage() {
                       disabled={currentPage === totalPages}
                       className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
                       title="Next"
+                      aria-label="Next page"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </button>
                   </div>
-                </>
-              )}
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -652,9 +790,9 @@ export default function FileViewPage() {
       {/* OCR Text Section */}
       {!isFullscreen && file.ocr_status === 'completed' && file.ocr_text && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-4 overflow-hidden rounded-xl border-2 border-border bg-card"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="border-t-2 border-border bg-card"
         >
           <button
             onClick={() => setShowOCR(!showOCR)}
@@ -665,11 +803,13 @@ export default function FileViewPage() {
                 <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div className="text-left">
-                <h3 className="font-bold text-foreground">Extracted Text (OCR)</h3>
+                <h3 className="text-sm font-bold text-foreground sm:text-base">
+                  Extracted Text (OCR)
+                </h3>
                 <p className="text-xs text-muted-foreground">{file.ocr_text.length} characters</p>
               </div>
             </div>
-            <motion.div animate={{ rotate: showOCR ? 180 : 0 }}>
+            <motion.div animate={{ rotate: showOCR ? 180 : 0 }} transition={{ duration: 0.2 }}>
               <ChevronLeft className="h-5 w-5 -rotate-90" />
             </motion.div>
           </button>
@@ -681,9 +821,10 @@ export default function FileViewPage() {
                 animate={{ height: 'auto' }}
                 exit={{ height: 0 }}
                 transition={{ duration: 0.2 }}
+                className="overflow-hidden"
               >
                 <div className="border-t-2 border-border p-4">
-                  <div className="mb-3 flex gap-2">
+                  <div className="mb-3 flex flex-wrap gap-2">
                     <button
                       onClick={handleCopyOCR}
                       className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
@@ -733,21 +874,27 @@ export default function FileViewPage() {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25 }}
-              className="fixed bottom-0 right-0 top-0 z-50 w-full max-w-md overflow-y-auto border-l-2 border-border bg-card p-6 shadow-2xl"
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed bottom-0 right-0 top-0 z-50 w-full overflow-y-auto border-l-2 border-border bg-card shadow-2xl sm:max-w-md"
             >
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-foreground">File Details</h2>
-                <button onClick={() => setShowInfo(false)} className="rounded-lg p-2 hover:bg-accent">
-                  <X className="h-5 w-5" />
-                </button>
+              <div className="sticky top-0 z-10 border-b-2 border-border bg-card/95 p-4 backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-foreground sm:text-xl">File Details</h2>
+                  <button
+                    onClick={() => setShowInfo(false)}
+                    className="rounded-lg p-2 hover:bg-accent"
+                    aria-label="Close"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 p-4">
                 {/* Filename */}
                 <div className="flex items-start gap-3">
-                  <FileText className="mt-1 h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1">
+                  <FileText className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-muted-foreground">File Name</p>
                     <p className="mt-1 break-all text-sm font-semibold">{file.filename}</p>
                   </div>
@@ -755,8 +902,8 @@ export default function FileViewPage() {
 
                 {/* Size */}
                 <div className="flex items-start gap-3">
-                  <HardDrive className="mt-1 h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1">
+                  <HardDrive className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-muted-foreground">Size</p>
                     <p className="mt-1 text-sm font-semibold">{formatBytes(file.size_bytes)}</p>
                   </div>
@@ -764,8 +911,8 @@ export default function FileViewPage() {
 
                 {/* Created */}
                 <div className="flex items-start gap-3">
-                  <Calendar className="mt-1 h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1">
+                  <Calendar className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-muted-foreground">Uploaded</p>
                     <p className="mt-1 text-sm font-semibold">
                       {formatDistanceToNow(new Date(file.created_at), { addSuffix: true })}
@@ -775,8 +922,8 @@ export default function FileViewPage() {
 
                 {/* Type */}
                 <div className="flex items-start gap-3">
-                  <FileText className="mt-1 h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1">
+                  <FileText className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-muted-foreground">Type</p>
                     <p className="mt-1 text-sm font-semibold">{file.mime_type}</p>
                   </div>
@@ -785,8 +932,8 @@ export default function FileViewPage() {
                 {/* Pages */}
                 {file.pages && (
                   <div className="flex items-start gap-3">
-                    <FileText className="mt-1 h-5 w-5 text-muted-foreground" />
-                    <div className="flex-1">
+                    <FileText className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-muted-foreground">Pages</p>
                       <p className="mt-1 text-sm font-semibold">{file.pages}</p>
                     </div>
@@ -795,8 +942,8 @@ export default function FileViewPage() {
 
                 {/* OCR Status */}
                 <div className="flex items-start gap-3">
-                  <OCRIcon className="mt-1 h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1">
+                  <OCRIcon className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-muted-foreground">OCR Status</p>
                     <span
                       className={`mt-1 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${ocrStatus.bg} ${ocrStatus.color}`}
@@ -810,11 +957,11 @@ export default function FileViewPage() {
                 {/* Folder */}
                 {file.folder_id && (
                   <div className="flex items-start gap-3">
-                    <Folder className="mt-1 h-5 w-5 text-muted-foreground" />
-                    <div className="flex-1">
+                    <Folder className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-muted-foreground">Folder</p>
                       <button
-                        onClick={handleGoToFolder}
+                        onClick={() => router.push(`/explore?folder_id=${file.folder_id}`)}
                         className="mt-1 text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400"
                       >
                         Go to folder →
@@ -824,27 +971,68 @@ export default function FileViewPage() {
                 )}
               </div>
 
-              {/* Keyboard Shortcuts */}
-              <div className="mt-8 rounded-xl border-2 border-border bg-muted p-4">
+              {/* Keyboard Shortcuts (Desktop) */}
+              <div className="m-4 rounded-lg border-2 border-border bg-muted p-4 hidden sm:block">
                 <h3 className="mb-3 text-sm font-bold">Keyboard Shortcuts</h3>
                 <div className="space-y-2 text-xs text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>Zoom In/Out</span>
-                    <kbd className="rounded bg-background px-2 py-1 font-mono font-semibold">+ -</kbd>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Rotate</span>
-                    <kbd className="rounded bg-background px-2 py-1 font-mono font-semibold">R</kbd>
-                  </div>
+                  {isImage && (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Zoom In/Out</span>
+                        <kbd className="rounded bg-background px-2 py-1 font-mono font-semibold">
+                          + -
+                        </kbd>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Rotate</span>
+                        <kbd className="rounded bg-background px-2 py-1 font-mono font-semibold">R</kbd>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Reset View</span>
+                        <kbd className="rounded bg-background px-2 py-1 font-mono font-semibold">
+                          Ctrl+0
+                        </kbd>
+                      </div>
+                    </>
+                  )}
                   {isPDF && totalPages > 1 && (
                     <div className="flex justify-between">
                       <span>Next/Previous</span>
-                      <kbd className="rounded bg-background px-2 py-1 font-mono font-semibold">← →</kbd>
+                      <kbd className="rounded bg-background px-2 py-1 font-mono font-semibold">
+                        ← →
+                      </kbd>
                     </div>
                   )}
                   <div className="flex justify-between">
                     <span>Fullscreen</span>
                     <kbd className="rounded bg-background px-2 py-1 font-mono font-semibold">F</kbd>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Close Panel</span>
+                    <kbd className="rounded bg-background px-2 py-1 font-mono font-semibold">Esc</kbd>
+                  </div>
+                </div>
+              </div>
+
+              {/* Touch Gestures (Mobile) */}
+              <div className="m-4 rounded-lg border-2 border-border bg-muted p-4 sm:hidden">
+                <h3 className="mb-3 text-sm font-bold">Touch Gestures</h3>
+                <div className="space-y-2 text-xs text-muted-foreground">
+                  {isImage && (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Zoom</span>
+                        <span className="font-semibold">Pinch</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Pan</span>
+                        <span className="font-semibold">Drag</span>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Scroll</span>
+                    <span className="font-semibold">Swipe</span>
                   </div>
                 </div>
               </div>
@@ -853,17 +1041,19 @@ export default function FileViewPage() {
         )}
       </AnimatePresence>
 
-      {/* Link Copied Toast */}
+      {/* Toast Notifications */}
       <AnimatePresence>
         {copiedLink && (
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-[calc(env(safe-area-inset-bottom)+24px)] right-6 z-50 flex items-center gap-2 rounded-xl bg-green-600 px-4 py-3 font-semibold text-white shadow-2xl"
+            className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-xl"
           >
-            <Check className="h-5 w-5" />
-            Link copied to clipboard!
+            <div className="flex items-center gap-2">
+              <Check className="h-4 w-4" />
+              Link copied to clipboard!
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
